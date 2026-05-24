@@ -12,6 +12,7 @@ loginBtn.href =
   `&response_type=token` +
   `&scope=identify`;
 
+// Pobranie tokena z URL
 const hash = window.location.hash;
 const token = new URLSearchParams(hash.replace("#", "?")).get("access_token");
 
@@ -23,9 +24,27 @@ if (token) {
   })
     .then(res => res.json())
     .then(user => {
-      document.getElementById("user").innerHTML = `
-        <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" />
-        <p>Witaj ${user.username}</p>
-      `;
+      // 🔥 zapis usera do pamięci
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // (opcjonalnie) pokazanie powitania chwilę
+      const userBox = document.getElementById("user");
+      if (userBox) {
+        userBox.innerHTML = `
+          <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" />
+          <p>Witaj ${user.username}</p>
+        `;
+      }
+
+      // 🔥 usuwa #token z URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      // 🔥 PRZEKIEROWANIE NA STRONĘ GŁÓWNĄ
+      setTimeout(() => {
+        window.location.href = "/vast/index.html";
+      }, 800);
+    })
+    .catch(err => {
+      console.error("Błąd logowania:", err);
     });
 }
