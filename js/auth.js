@@ -5,18 +5,33 @@ const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
 const loginBtn = document.getElementById("loginBtn");
 
-// Discord OAuth (implicit flow – działa na static hosting)
-loginBtn.href =
-  `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-  `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-  `&response_type=token` +
-  `&scope=identify`;
+// ==============================
+// 🔥 LOGIN LINK (Discord OAuth)
+// ==============================
+if (loginBtn) {
+  loginBtn.href =
+    `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
+    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+    `&response_type=token` +
+    `&scope=identify`;
+}
 
-// Pobranie tokena z URL
-const hash = window.location.hash;
-const token = new URLSearchParams(hash.replace("#", "?")).get("access_token");
+// ==============================
+// 🔥 AUTO LOGIN CHECK
+// ==============================
+function getTokenFromHash() {
+  if (!window.location.hash) return null;
+
+  const params = new URLSearchParams(window.location.hash.substring(1));
+  return params.get("access_token");
+}
+
+const token = getTokenFromHash();
 
 if (token) {
+  // zapobiega ponownemu odpalaniu
+  window.history.replaceState({}, document.title, window.location.pathname);
+
   fetch("https://discord.com/api/users/@me", {
     headers: {
       Authorization: `Bearer ${token}`
@@ -24,27 +39,58 @@ if (token) {
   })
     .then(res => res.json())
     .then(user => {
-      // 🔥 zapis usera do pamięci
+      // ==============================
+      // 🔥 SAVE USER
+      // ==============================
       localStorage.setItem("user", JSON.stringify(user));
 
-      // (opcjonalnie) pokazanie powitania chwilę
+      // ==============================
+      // 🔥 UI UPDATE (opcjonalne)
+      // ==============================
       const userBox = document.getElementById("user");
+
       if (userBox) {
+        const avatarURL = user.avatar
+          ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+          : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
         userBox.innerHTML = `
-          <img class="avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" />
+          <img class="avatar" src="${avatarURL}" />
           <p>Witaj ${user.username}</p>
         `;
       }
 
-      // 🔥 usuwa #token z URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-
-      // 🔥 PRZEKIEROWANIE NA STRONĘ GŁÓWNĄ
+      // ==============================
+      // 🔥 REDIRECT NA STRONĘ GŁÓWNĄ
+      // ==============================
       setTimeout(() => {
-        window.location.href = "/vast/index.html";
-      }, 800);
+        window.location.replace("/vast/index.html");
+      }, 600);
     })
     .catch(err => {
-      console.error("Błąd logowania:", err);
+      console.error("Błąd logowania Discord:", err);
     });
+}
+
+// ==============================
+// 🔥 AUTO LOGIN Z LOCALSTORAGE
+// (żeby GitHub Pages nie logowało za każdym razem)
+// ==============================
+const savedUser = localStorage.getItem("user");
+
+if (savedUser && !token) {
+  const user = JSON.parse(savedUser);
+
+  const userBox = document.getElementById("user");
+
+  if (userBox) {
+    const avatarURL = user.avatar
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+      : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+    userBox.innerHTML = `
+      <img class="avatar" src="${avatarURL}" />
+      <p>Witaj ponownie ${user.username}</p>
+    `;
+  }
 }
