@@ -1,7 +1,7 @@
-const CLIENT_ID = "TWOJE_CLIENT_ID";
+const CLIENT_ID = "1480598374024483012";
 
 // 🔥 MUSI być dokładnie Twój GitHub Pages URL:
-const REDIRECT_URI = "https://rickulinio.github.io/vastrp/login.html";
+const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
 const loginBtn = document.getElementById("loginBtn");
 
