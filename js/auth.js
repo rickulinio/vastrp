@@ -4,6 +4,7 @@ const CLIENT_ID = "1480598374024483012";
 const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
 const loginBtn = document.getElementById("loginBtn");
+const userBox = document.getElementById("user");
 
 // ==============================
 // 🔥 LOGIN LINK (Discord OAuth)
@@ -17,7 +18,33 @@ if (loginBtn) {
 }
 
 // ==============================
-// 🔥 AUTO LOGIN CHECK
+// 🔥 FUNKCJA RENDER USERA
+// ==============================
+function renderUser(user) {
+  const avatarURL = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  // avatar + tekst
+  if (userBox) {
+    userBox.innerHTML = `
+      <div class="profile">
+        <img class="avatar" src="${avatarURL}" />
+        <p>${user.username}</p>
+      </div>
+    `;
+  }
+
+  // zmiana przycisku login
+  if (loginBtn) {
+    loginBtn.textContent = `Zalogowano jako ${user.username}`;
+    loginBtn.style.pointerEvents = "none";
+    loginBtn.style.opacity = "0.7";
+  }
+}
+
+// ==============================
+// 🔥 POBIERANIE TOKENA Z URL
 // ==============================
 function getTokenFromHash() {
   if (!window.location.hash) return null;
@@ -28,8 +55,10 @@ function getTokenFromHash() {
 
 const token = getTokenFromHash();
 
+// ==============================
+// 🔥 LOGIN FLOW
+// ==============================
 if (token) {
-  // zapobiega ponownemu odpalaniu
   window.history.replaceState({}, document.title, window.location.pathname);
 
   fetch("https://discord.com/api/users/@me", {
@@ -39,30 +68,10 @@ if (token) {
   })
     .then(res => res.json())
     .then(user => {
-      // ==============================
-      // 🔥 SAVE USER
-      // ==============================
       localStorage.setItem("user", JSON.stringify(user));
 
-      // ==============================
-      // 🔥 UI UPDATE (opcjonalne)
-      // ==============================
-      const userBox = document.getElementById("user");
+      renderUser(user);
 
-      if (userBox) {
-        const avatarURL = user.avatar
-          ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-          : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-        userBox.innerHTML = `
-          <img class="avatar" src="${avatarURL}" />
-          <p>Witaj ${user.username}</p>
-        `;
-      }
-
-      // ==============================
-      // 🔥 REDIRECT NA STRONĘ GŁÓWNĄ
-      // ==============================
       setTimeout(() => {
         window.location.replace("/vast/index.html");
       }, 600);
@@ -73,24 +82,11 @@ if (token) {
 }
 
 // ==============================
-// 🔥 AUTO LOGIN Z LOCALSTORAGE
-// (żeby GitHub Pages nie logowało za każdym razem)
+// 🔥 AUTO LOGIN (LOCALSTORAGE)
 // ==============================
 const savedUser = localStorage.getItem("user");
 
 if (savedUser && !token) {
   const user = JSON.parse(savedUser);
-
-  const userBox = document.getElementById("user");
-
-  if (userBox) {
-    const avatarURL = user.avatar
-      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-      : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-    userBox.innerHTML = `
-      <img class="avatar" src="${avatarURL}" />
-      <p>Witaj ponownie ${user.username}</p>
-    `;
-  }
+  renderUser(user);
 }

@@ -39,7 +39,6 @@
 
   color: white;
 
-  /* CINEMATIC ANIMATION */
   opacity: 0;
   transform: scale(0.85) translateY(20px);
   filter: blur(12px);
@@ -47,7 +46,7 @@
   animation: loginIntro 1.1s ease-out forwards;
 }
 
-/* LOGO CENTER FIX */
+/* LOGO */
 .auth-logo {
   width: 100px;
   margin: 0 auto 10px auto;
@@ -78,7 +77,48 @@
   box-shadow: 0 15px 35px rgba(88,101,242,0.35);
 }
 
-/* CINEMATIC KEYFRAMES */
+/* USER SECTION (POPRAWIONE) */
+.user-box {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* PROFILE WRAPPER */
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+/* AVATAR (DUŻY, DISCORD STYLE) */
+.avatar {
+  width: 90px;
+  height: 90px;
+
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 3px solid #5865F2;
+
+  box-shadow: 0 0 25px rgba(88,101,242,0.35);
+}
+
+/* TEXT UNDER AVATAR */
+.profile p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* ANIMATION */
 @keyframes loginIntro {
   0% {
     opacity: 0;
@@ -102,19 +142,9 @@
     width: 90%;
     padding: 30px;
   }
-}
 
-.user-box {
-  margin-top: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.15);
+  .avatar {
+    width: 75px;
+    height: 75px;
+  }
 }
