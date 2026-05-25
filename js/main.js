@@ -1,10 +1,53 @@
 /* ================= SAFE HELPERS ================= */
 const $ = (id) => document.getElementById(id);
 
-/* ================= FACTIONS ================= */
-const fg = $("factions-grid");
+/* ================= MAIN INIT ================= */
 
-if (fg && Array.isArray(window.FACTIONS)) {
+document.addEventListener("DOMContentLoaded", init);
+
+function init() {
+  try {
+    renderFactions();
+    renderTeam();
+    renderFAQ();
+
+    initFAQToggle();
+    initScrollNav();
+    initCounters();
+    initReveal();
+    initRules();
+    initKeys();
+    initMobileMenu();
+    initAuth();
+
+    // 🔥 ważne: loader na końcu
+    hideLoader();
+
+  } catch (err) {
+    console.error("MAIN ERROR:", err);
+    hideLoader();
+  }
+}
+
+/* ================= LOADER ================= */
+
+function hideLoader() {
+  const loader = $("loader");
+  if (!loader) return;
+
+  loader.classList.add("hidden");
+
+  setTimeout(() => {
+    loader.remove();
+  }, 400);
+}
+
+/* ================= FACTIONS ================= */
+
+function renderFactions() {
+  const fg = $("factions-grid");
+  if (!fg || !Array.isArray(window.FACTIONS)) return;
+
   fg.innerHTML = "";
 
   window.FACTIONS.forEach(f => {
@@ -36,9 +79,11 @@ if (fg && Array.isArray(window.FACTIONS)) {
 }
 
 /* ================= TEAM ================= */
-const tg = $("team-grid");
 
-if (tg && Array.isArray(window.TEAM)) {
+function renderTeam() {
+  const tg = $("team-grid");
+  if (!tg || !Array.isArray(window.TEAM)) return;
+
   tg.innerHTML = window.TEAM.map(m => `
     <div class="team-card reveal">
       <img class="team-av" src="${m.image}" alt="${m.name}">
@@ -49,9 +94,11 @@ if (tg && Array.isArray(window.TEAM)) {
 }
 
 /* ================= FAQ ================= */
-const fl = $("faq-list");
 
-if (fl && Array.isArray(window.FAQS)) {
+function renderFAQ() {
+  const fl = $("faq-list");
+  if (!fl || !Array.isArray(window.FAQS)) return;
+
   fl.innerHTML = window.FAQS.map(item => `
     <div class="faq-item">
       <button class="faq-q" data-faq>
@@ -71,65 +118,79 @@ if (fl && Array.isArray(window.FAQS)) {
 }
 
 /* ================= FAQ TOGGLE ================= */
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-faq]");
-  if (!btn) return;
 
-  const item = btn.closest(".faq-item");
-  if (!item) return;
+function initFAQToggle() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-faq]");
+    if (!btn) return;
 
-  const isOpen = item.classList.contains("open");
+    const item = btn.closest(".faq-item");
+    if (!item) return;
 
-  document.querySelectorAll(".faq-item.open")
-    .forEach(i => i.classList.remove("open"));
+    const isOpen = item.classList.contains("open");
 
-  if (!isOpen) item.classList.add("open");
-});
+    document.querySelectorAll(".faq-item.open")
+      .forEach(i => i.classList.remove("open"));
 
-/* ================= NAV ================= */
-window.addEventListener("scroll", () => {
-  const nav = $("nav");
-  if (!nav) return;
-
-  nav.classList.toggle("scrolled", window.scrollY > 20);
-});
-
-/* ================= COUNTERS ================= */
-function countUp(el, to, dur) {
-  if (!el) return;
-
-  let v = 0;
-  const step = to / (dur / 16);
-
-  const t = setInterval(() => {
-    v = Math.min(v + step, to);
-    el.textContent = Math.floor(v);
-
-    if (v >= to) clearInterval(t);
-  }, 16);
+    if (!isOpen) item.classList.add("open");
+  });
 }
 
-setTimeout(() => {
-  countUp($("s-players"), 47, 1200);
-  countUp($("s-discord"), 1284, 1800);
-}, 300);
+/* ================= NAV ================= */
+
+function initScrollNav() {
+  window.addEventListener("scroll", () => {
+    const nav = $("nav");
+    if (!nav) return;
+
+    nav.classList.toggle("scrolled", window.scrollY > 20);
+  });
+}
+
+/* ================= COUNTERS ================= */
+
+function initCounters() {
+  function countUp(el, to, dur) {
+    if (!el) return;
+
+    let v = 0;
+    const step = to / (dur / 16);
+
+    const t = setInterval(() => {
+      v = Math.min(v + step, to);
+      el.textContent = Math.floor(v);
+
+      if (v >= to) clearInterval(t);
+    }, 16);
+  }
+
+  setTimeout(() => {
+    countUp($("s-players"), 47, 1200);
+    countUp($("s-discord"), 1284, 1800);
+  }, 300);
+}
 
 /* ================= REVEAL ================= */
-const obs = new IntersectionObserver((entries) => {
-  entries.forEach((e) => {
-    if (e.isIntersecting) {
-      e.target.classList.add("visible");
-      obs.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.08 });
 
-document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+function initReveal() {
+  const obs = new IntersectionObserver((entries, observer) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add("visible");
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
 
-/* ================= RULE HIGHLIGHT ================= */
-const ruleItems = document.querySelectorAll(".rule-item");
+  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+}
 
-if (ruleItems.length) {
+/* ================= RULES ================= */
+
+function initRules() {
+  const ruleItems = document.querySelectorAll(".rule-item");
+  if (!ruleItems.length) return;
+
   const ruleObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -146,47 +207,52 @@ if (ruleItems.length) {
 }
 
 /* ================= KEY EFFECT ================= */
-document.querySelectorAll(".key").forEach(key => {
-  key.addEventListener("click", () => {
-    key.classList.add("show");
 
-    setTimeout(() => key.classList.remove("show"), 1600);
+function initKeys() {
+  document.querySelectorAll(".key").forEach(key => {
+    key.addEventListener("click", () => {
+      key.classList.add("show");
+
+      setTimeout(() => {
+        key.classList.remove("show");
+      }, 1600);
+    });
   });
-});
+}
 
 /* ================= MOBILE MENU ================= */
-const navToggle = $("navToggle");
-const mobileMenu = $("mobileMenu");
-const mobileOverlay = $("mobileOverlay");
 
-function openMenu() {
-  if (!mobileMenu || !mobileOverlay || !navToggle) return;
+function initMobileMenu() {
+  const navToggle = $("navToggle");
+  const mobileMenu = $("mobileMenu");
+  const mobileOverlay = $("mobileOverlay");
 
-  mobileMenu.classList.add("active");
-  mobileOverlay.classList.add("active");
-  navToggle.textContent = "✕";
+  function openMenu() {
+    mobileMenu?.classList.add("active");
+    mobileOverlay?.classList.add("active");
+    if (navToggle) navToggle.textContent = "✕";
+  }
+
+  function closeMenu() {
+    mobileMenu?.classList.remove("active");
+    mobileOverlay?.classList.remove("active");
+    if (navToggle) navToggle.textContent = "☰";
+  }
+
+  navToggle?.addEventListener("click", () => {
+    mobileMenu?.classList.contains("active") ? closeMenu() : openMenu();
+  });
+
+  mobileOverlay?.addEventListener("click", closeMenu);
+
+  document.querySelectorAll(".mobile-menu a").forEach(a => {
+    a.addEventListener("click", closeMenu);
+  });
 }
 
-function closeMenu() {
-  if (!mobileMenu || !mobileOverlay || !navToggle) return;
+/* ================= AUTH ================= */
 
-  mobileMenu.classList.remove("active");
-  mobileOverlay.classList.remove("active");
-  navToggle.textContent = "☰";
-}
-
-navToggle?.addEventListener("click", () => {
-  mobileMenu?.classList.contains("active") ? closeMenu() : openMenu();
-});
-
-mobileOverlay?.addEventListener("click", closeMenu);
-
-document.querySelectorAll(".mobile-menu a").forEach(a => {
-  a.addEventListener("click", closeMenu);
-});
-
-/* ================= AUTH (FIX: NO GLOBAL VARIABLES) ================= */
-(function () {
+function initAuth() {
   function getUser() {
     try {
       return JSON.parse(localStorage.getItem("user"));
@@ -201,14 +267,6 @@ document.querySelectorAll(".mobile-menu a").forEach(a => {
       : `https://cdn.discordapp.com/embed/avatars/0.png`;
   }
 
-  function clearUI() {
-    const loginBtn = $("loginBtn");
-    const userBox = $("user");
-
-    if (loginBtn) loginBtn.style.display = "inline-flex";
-    if (userBox) userBox.innerHTML = "";
-  }
-
   function render() {
     const user = getUser();
 
@@ -216,7 +274,8 @@ document.querySelectorAll(".mobile-menu a").forEach(a => {
     const userBox = $("user");
 
     if (!user || !userBox) {
-      clearUI();
+      if (loginBtn) loginBtn.style.display = "inline-flex";
+      if (userBox) userBox.innerHTML = "";
       return;
     }
 
@@ -257,5 +316,5 @@ document.querySelectorAll(".mobile-menu a").forEach(a => {
   }
 
   window.addEventListener("auth:update", render);
-  document.addEventListener("DOMContentLoaded", render);
-})();
+  render();
+}
