@@ -1,7 +1,8 @@
-/* ─── SAFE HELPER (NO CONFLICT VERSION) ─── */
+
+/* ─── SAFE HELPER ─── */
 const $id = (id) => document.getElementById(id);
 
-/* ─── AUTH SYNC ─── */
+/* ─── AUTH ─── */
 (function authSync() {
   try {
     const savedUser = localStorage.getItem("user");
@@ -10,7 +11,7 @@ const $id = (id) => document.getElementById(id);
     const userBox = $id("user");
 
     if (!savedUser || savedUser === "undefined") {
-      if (loginBtn) loginBtn.style.display = "inline-flex";
+      loginBtn?.style.setProperty("display", "inline-flex");
       if (userBox) userBox.innerHTML = "";
       return;
     }
@@ -27,9 +28,7 @@ const $id = (id) => document.getElementById(id);
       ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
       : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-    if (loginBtn) {
-      loginBtn.style.setProperty("display", "none", "important");
-    }
+    loginBtn?.style.setProperty("display", "none", "important");
 
     if (!userBox) return;
 
@@ -54,6 +53,7 @@ const $id = (id) => document.getElementById(id);
     const dropdown = userBox.querySelector(".dropdown-menu");
 
     trigger?.addEventListener("click", () => {
+      if (!dropdown) return;
       dropdown.style.display =
         dropdown.style.display === "block" ? "none" : "block";
     });
@@ -64,46 +64,56 @@ const $id = (id) => document.getElementById(id);
       location.reload();
     });
 
-  } catch (err) {
-    console.error("AUTH ERROR:", err);
+  } catch (e) {
+    console.error("AUTH CRASH:", e);
   }
 })();
 
-/* ─── FACTIONS ─── */
-const fg = $id("factions-grid");
-if (fg && typeof FACTIONS !== "undefined") {
-  FACTIONS.forEach(f => {
+/* ─── FACTIONS SAFE ─── */
+(function renderFactions() {
+  const fg = $id("factions-grid");
+  if (!fg) return;
+  if (!Array.isArray(window.FACTIONS)) return;
+
+  window.FACTIONS.forEach(f => {
+    if (!f) return;
+
     const el = document.createElement("div");
     el.className = "faction-card reveal";
-    el.style.setProperty("--fc", f.color);
+    el.style.setProperty("--fc", f.color || "#fff");
 
     el.innerHTML = `
       <div class="fc-top">
-        <div class="fc-icon">${f.icon}</div>
-        <div class="fc-name">${f.name}</div>
+        <div class="fc-icon">${f.icon || ""}</div>
+        <div class="fc-name">${f.name || ""}</div>
       </div>
-      <p class="fc-desc">${f.desc}</p>
+      <p class="fc-desc">${f.desc || ""}</p>
     `;
 
     fg.appendChild(el);
   });
-}
+})();
 
-/* ─── TEAM ─── */
-const tg = $id("team-grid");
-if (tg && typeof TEAM !== "undefined") {
-  TEAM.forEach(m => {
+/* ─── TEAM SAFE ─── */
+(function renderTeam() {
+  const tg = $id("team-grid");
+  if (!tg) return;
+  if (!Array.isArray(window.TEAM)) return;
+
+  window.TEAM.forEach(m => {
+    if (!m) return;
+
     tg.innerHTML += `
       <div class="team-card reveal">
-        <img src="${m.image}" class="team-av">
-        <div>${m.name}</div>
-        <div>${m.role}</div>
+        <img src="${m.image || ""}" class="team-av">
+        <div>${m.name || ""}</div>
+        <div>${m.role || ""}</div>
       </div>
     `;
   });
-}
+})();
 
-/* ─── NAV SCROLL ─── */
+/* ─── NAV ─── */
 window.addEventListener("scroll", () => {
   const nav = $id("nav");
   if (nav) nav.classList.toggle("scrolled", scrollY > 20);
@@ -128,11 +138,14 @@ setTimeout(() => {
   countUp($id("s-discord"), 1284, 1800);
 }, 300);
 
-/* ─── PARTICLES SAFE ─── */
-const canvas = document.getElementById("particles");
-const ctx = canvas?.getContext("2d");
+/* ─── PARTICLES 100% SAFE ─── */
+(function particles() {
+  const canvas = document.getElementById("particles");
+  if (!canvas) return;
 
-if (canvas && ctx) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
   const particles = [];
 
   function resize() {
@@ -143,7 +156,7 @@ if (canvas && ctx) {
   resize();
   window.addEventListener("resize", resize);
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 40; i++) {
     particles.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -173,4 +186,4 @@ if (canvas && ctx) {
   }
 
   animate();
-}
+})();
