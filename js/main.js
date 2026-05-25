@@ -262,8 +262,6 @@ if (canvas && ctx) {
   animateParticles();
 }
 
-/* ─── SIMPLE AUTH (NO LAYOUT, ONLY LOGOUT BUTTON) ─── */
-
 const savedUser = localStorage.getItem("user");
 const loginBtn = document.getElementById("loginBtn");
 const userBox = document.getElementById("user");
@@ -296,3 +294,66 @@ if (!savedUser) {
     });
   }
 }
+
+/* ─── AUTH LIVE UPDATE FIX ─── */
+
+function renderAuthUI() {
+  const saved = localStorage.getItem("user");
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
+
+  if (!saved) {
+    if (loginBtn) loginBtn.style.display = "inline-flex";
+    if (userBox) userBox.innerHTML = "";
+    return;
+  }
+
+  const user = JSON.parse(saved);
+
+  if (loginBtn) loginBtn.style.display = "none";
+
+  const avatar = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  if (userBox) {
+    userBox.innerHTML = `
+      <div class="user-dropdown">
+        <div class="user-trigger" id="userTrigger">
+          <img src="${avatar}" class="user-avatar">
+          <span class="user-name">${user.username}</span>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+          <button class="logout-btn" id="logoutBtn">Wyloguj się</button>
+        </div>
+      </div>
+    `;
+
+    const trigger = document.getElementById("userTrigger");
+    const menu = document.getElementById("userMenu");
+    const logout = document.getElementById("logoutBtn");
+
+    trigger?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu?.classList.toggle("active");
+    });
+
+    logout?.addEventListener("click", () => {
+      localStorage.removeItem("user");
+      renderAuthUI();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!userBox.contains(e.target)) {
+        menu?.classList.remove("active");
+      }
+    });
+  }
+}
+
+/* event z auth.js */
+window.addEventListener("auth:update", renderAuthUI);
+
+/* init przy starcie */
+renderAuthUI();
