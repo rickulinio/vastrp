@@ -1,6 +1,5 @@
 const CLIENT_ID = "1480598374024483012";
 
-/* ================= BASE ================= */
 const BASE_URL = "https://rickulinio.github.io/vast/";
 const LOGIN_URL = BASE_URL + "login.html";
 
@@ -23,7 +22,7 @@ function getToken() {
   return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
 
-/* ================= CLEAN URL ================= */
+/* ================= CLEAN ================= */
 
 function cleanUrl() {
   window.history.replaceState({}, document.title, window.location.pathname);
@@ -41,14 +40,13 @@ if (token) {
   })
     .then(r => r.json())
     .then(user => {
-      if (!user?.id) throw new Error("invalid user");
+      if (!user?.id) throw new Error("bad user");
 
       localStorage.setItem("user", JSON.stringify(user));
 
       cleanUrl();
 
-      // 🔥 NAJWAŻNIEJSZE:
-      // zawsze wraca na STRONĘ GŁÓWNĄ
+      // 🔥 WRACAMY NA STRONĘ GŁÓWNĄ
       window.location.replace(BASE_URL);
     })
     .catch(() => {
