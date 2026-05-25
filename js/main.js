@@ -1,10 +1,7 @@
-/* ─── SAFE HELPERS ─── */
-const $id = (id) => document.getElementById(id);
-const $qs = (s) => document.querySelector(s);
-const $qsa = (s) => document.querySelectorAll(s);
+const $ = (id) => document.getElementById(id);
 
 /* ─── RENDER FACTIONS ─── */
-const fg = $id("factions-grid");
+const fg = $("factions-grid");
 
 if (fg && Array.isArray(FACTIONS)) {
   FACTIONS.forEach(f => {
@@ -37,7 +34,7 @@ if (fg && Array.isArray(FACTIONS)) {
 }
 
 /* ─── RENDER TEAM ─── */
-const tg = $id("team-grid");
+const tg = $("team-grid");
 
 if (tg && Array.isArray(TEAM)) {
   TEAM.forEach(m => {
@@ -52,7 +49,7 @@ if (tg && Array.isArray(TEAM)) {
 }
 
 /* ─── RENDER FAQ ─── */
-const fl = $id("faq-list");
+const fl = $("faq-list");
 
 if (fl && Array.isArray(FAQS)) {
   FAQS.forEach(item => {
@@ -82,7 +79,7 @@ function toggleFaq(btn) {
 
   const isOpen = item.classList.contains('open');
 
-  $qsa('.faq-item.open')
+  document.querySelectorAll('.faq-item.open')
     .forEach(i => i.classList.remove('open'));
 
   if (!isOpen) item.classList.add('open');
@@ -90,7 +87,7 @@ function toggleFaq(btn) {
 
 /* ─── NAV SCROLL ─── */
 window.addEventListener('scroll', () => {
-  const nav = $id("nav");
+  const nav = $("nav");
   if (!nav) return;
 
   nav.classList.toggle('scrolled', scrollY > 20);
@@ -111,8 +108,8 @@ function countUp(el, to, dur) {
 }
 
 setTimeout(() => {
-  countUp($id("s-players"), 47, 1200);
-  countUp($id("s-discord"), 1284, 1800);
+  countUp($("s-players"), 47, 1200);
+  countUp($("s-discord"), 1284, 1800);
 }, 300);
 
 /* ─── REVEAL ─── */
@@ -124,17 +121,18 @@ const obs = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.08 });
 
-$qsa('.reveal').forEach(el => obs.observe(el));
+document.querySelectorAll('.reveal')
+  .forEach(el => obs.observe(el));
 
 /* ─── RULE HIGHLIGHT ─── */
-const ruleItems = $qsa('.rule-item');
+const ruleItems = document.querySelectorAll('.rule-item');
 
 if (ruleItems.length) {
   const ruleObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
 
-        $qsa('.rule-title')
+        document.querySelectorAll('.rule-title')
           .forEach(t => t.classList.remove('active'));
 
         const title = entry.target.querySelector('.rule-title');
@@ -147,7 +145,7 @@ if (ruleItems.length) {
 }
 
 /* ─── KEY EFFECT ─── */
-$qsa('.key').forEach(key => {
+document.querySelectorAll('.key').forEach(key => {
   key.addEventListener('click', () => {
     key.classList.toggle('show');
 
@@ -158,9 +156,9 @@ $qsa('.key').forEach(key => {
 });
 
 /* ─── MOBILE MENU ─── */
-const navToggle = $id("navToggle");
-const mobileMenu = $id("mobileMenu");
-const mobileOverlay = $id("mobileOverlay");
+const navToggle = $("navToggle");
+const mobileMenu = $("mobileMenu");
+const mobileOverlay = $("mobileOverlay");
 
 function openMenu() {
   if (!mobileMenu || !mobileOverlay || !navToggle) return;
@@ -189,6 +187,6 @@ if (mobileOverlay) {
   mobileOverlay.addEventListener("click", closeMenu);
 }
 
-$qsa(".mobile-menu a").forEach(a => {
+document.querySelectorAll(".mobile-menu a").forEach(a => {
   a.addEventListener("click", closeMenu);
 });
