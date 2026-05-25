@@ -295,20 +295,16 @@ if (!savedUser) {
   }
 }
 
-/* ─── AUTH LIVE UPDATE FIX ─── */
-
-function renderAuthUI() {
-  const saved = localStorage.getItem("user");
+function updateAuthUI() {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
   const loginBtn = document.getElementById("loginBtn");
   const userBox = document.getElementById("user");
 
-  if (!saved) {
+  if (!user) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
     if (userBox) userBox.innerHTML = "";
     return;
   }
-
-  const user = JSON.parse(saved);
 
   if (loginBtn) loginBtn.style.display = "none";
 
@@ -325,7 +321,7 @@ function renderAuthUI() {
         </div>
 
         <div class="user-menu" id="userMenu">
-          <button class="logout-btn" id="logoutBtn">Wyloguj się</button>
+          <button id="logoutBtn" class="logout-btn">Wyloguj się</button>
         </div>
       </div>
     `;
@@ -341,7 +337,7 @@ function renderAuthUI() {
 
     logout?.addEventListener("click", () => {
       localStorage.removeItem("user");
-      renderAuthUI();
+      updateAuthUI();
     });
 
     document.addEventListener("click", (e) => {
@@ -352,8 +348,8 @@ function renderAuthUI() {
   }
 }
 
-/* event z auth.js */
-window.addEventListener("auth:update", renderAuthUI);
+/* START */
+updateAuthUI();
 
-/* init przy starcie */
-renderAuthUI();
+/* UPDATE PO LOGINIE */
+window.addEventListener("auth:update", updateAuthUI);

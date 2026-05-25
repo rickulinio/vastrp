@@ -86,3 +86,8 @@ const saved = getSavedUser();
 if (saved && window.location.pathname.includes("login.html")) {
   window.location.replace(BASE_URL);
 }
+
+function updateNavbarUI() {
+  console.log("AUTH EVENT FIRED");
+  window.dispatchEvent(new Event("auth:update"));
+}
