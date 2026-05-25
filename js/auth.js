@@ -19,15 +19,24 @@ function renderUser(user) {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  if (loginBtn) loginBtn.style.display = "none";
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
 
-  if (profileBtn) {
-    profileBtn.style.display = "flex";
-    profileBtn.setAttribute("data-name", user.username);
+  if (loginBtn) {
+    loginBtn.style.display = "none"; // 🔥 UKRYWASZ LOGIN
+  }
 
-    profileBtn.innerHTML = `
-      <img src="${avatarURL}" alt="avatar">
+  if (userBox) {
+    userBox.style.display = "flex";
+    userBox.innerHTML = `
+      <div class="profile">
+        <img class="avatar" src="${avatarURL}" />
+        <p>${user.username}</p>
+      </div>
     `;
+
+    // 🔥 hover nick (prosto)
+    userBox.title = user.username;
   }
 }
 
