@@ -1,10 +1,10 @@
 const CLIENT_ID = "1480598374024483012";
 const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
-const loginBtn = document.getElementById("loginBtn");
-const profileBtn = document.getElementById("profileBtn");
+/* ================= LOGIN BUTTON ================= */
 
-// ================= LOGIN LINK =================
+const loginBtn = document.getElementById("loginBtn");
+
 if (loginBtn) {
   loginBtn.href =
     `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
@@ -13,127 +13,110 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
-// ================= RENDER PROFILE =================
+/* ================= RENDER USER ================= */
+
 function renderUser(user) {
+  const userBox = document.getElementById("user");
+  const loginBtn = document.getElementById("loginBtn");
+
+  if (!userBox) return;
+
   const avatarURL = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  const loginBtn = document.getElementById("loginBtn");
-  const userBox = document.getElementById("user");
+  // chowamy login
+  if (loginBtn) {
+    loginBtn.style.display = "none";
+  }
 
-  if (loginBtn) loginBtn.style.display = "none";
-  if (!userBox) return;
-
+  // pokazujemy usera
   userBox.style.display = "flex";
 
   userBox.innerHTML = `
-    <div class="profile">
-      <img class="avatar" src="${avatarURL}" />
+    <div class="profile-wrap" id="profileBtn">
+      <img class="avatar" src="${avatarURL}" alt="">
       <span>${user.username}</span>
     </div>
 
-    <div class="dropdown">
+    <div class="profile-menu" id="profileMenu">
       <a href="profile.html">👤 Profil</a>
       <a href="settings.html">⚙️ Settings</a>
       <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
-      <a href="#" id="logoutBtn">🚪 Logout</a>
+
+      <div class="menu-divider"></div>
+
+      <a href="#" class="logout-btn" id="logoutBtn">
+        🚪 Wyloguj się
+      </a>
     </div>
   `;
 
-  // toggle dropdown
-  userBox.onclick = () => {
-    userBox.classList.toggle("active");
-  };
+  const profileBtn = document.getElementById("profileBtn");
+  const profileMenu = document.getElementById("profileMenu");
 
-  // logout
-  setTimeout(() => {
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-      logoutBtn.onclick = (e) => {
-        e.preventDefault();
-        localStorage.removeItem("user");
-        location.reload();
-      };
-    }
-  }, 0);
+  /* ===== OPEN / CLOSE ===== */
 
-  // close when clicking outside
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    profileMenu.classList.toggle("active");
+  });
+
+  /* ===== CLOSE WHEN CLICK OUTSIDE ===== */
+
   document.addEventListener("click", (e) => {
     if (!userBox.contains(e.target)) {
-      userBox.classList.remove("active");
+      profileMenu.classList.remove("active");
     }
   });
-}function renderUser(user) {
-  const avatarURL = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  const loginBtn = document.getElementById("loginBtn");
-  const userBox = document.getElementById("user");
+  /* ===== LOGOUT ===== */
 
-  if (loginBtn) loginBtn.style.display = "none";
-  if (!userBox) return;
+  const logoutBtn = document.getElementById("logoutBtn");
 
-  userBox.style.display = "flex";
+  logoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
 
-  userBox.innerHTML = `
-    <div class="profile">
-      <img class="avatar" src="${avatarURL}" />
-      <span>${user.username}</span>
-    </div>
+    localStorage.removeItem("user");
 
-    <div class="dropdown">
-      <a href="profile.html">👤 Profil</a>
-      <a href="settings.html">⚙️ Settings</a>
-      <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
-      <a href="#" id="logoutBtn">🚪 Logout</a>
-    </div>
-  `;
-
-  // toggle dropdown
-  userBox.onclick = () => {
-    userBox.classList.toggle("active");
-  };
-
-  // logout
-  setTimeout(() => {
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-      logoutBtn.onclick = (e) => {
-        e.preventDefault();
-        localStorage.removeItem("user");
-        location.reload();
-      };
-    }
-  }, 0);
-
-  // close when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!userBox.contains(e.target)) {
-      userBox.classList.remove("active");
-    }
+    window.location.reload();
   });
 }
 
-// ================= TOKEN =================
+/* ================= TOKEN ================= */
+
 function getToken() {
   if (!window.location.hash) return null;
-  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+
+  return new URLSearchParams(
+    window.location.hash.substring(1)
+  ).get("access_token");
 }
 
 const token = getToken();
 
-// ================= LOGIN FLOW =================
+/* ================= LOGIN FLOW ================= */
+
 if (token) {
-  window.history.replaceState({}, document.title, window.location.pathname);
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
 
   fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   })
     .then(r => r.json())
     .then(user => {
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
+
       renderUser(user);
 
       setTimeout(() => {
@@ -142,7 +125,8 @@ if (token) {
     });
 }
 
-// ================= AUTO LOGIN =================
+/* ================= AUTO LOGIN ================= */
+
 const savedUser = localStorage.getItem("user");
 
 if (savedUser && !token) {

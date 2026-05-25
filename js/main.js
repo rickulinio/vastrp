@@ -33,36 +33,6 @@ window.addEventListener("load", () => {
 /* ─── SAFE HELPERS ─── */
 const $ = (id) => document.getElementById(id);
 
-/* ─── AUTH SYNC (🔥 FIX LOGIN NA HOME) ─── */
-(function authSync() {
-  const savedUser = localStorage.getItem("user");
-  if (!savedUser) return;
-
-  const user = JSON.parse(savedUser);
-
-  const loginBtn = $("loginBtn");
-  const userBox = $("user");
-
-  const avatarURL = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  if (loginBtn) loginBtn.style.display = "none";
-
-  if (userBox) {
-    userBox.style.display = "flex";
-
-    userBox.innerHTML = `
-      <div class="profile">
-        <img class="avatar" src="${avatarURL}" />
-        <span>${user.username}</span>
-      </div>
-    `;
-
-    userBox.title = user.username;
-  }
-})();
-
 /* ─── RENDER FACTIONS ─── */
 const fg = $("factions-grid");
 
