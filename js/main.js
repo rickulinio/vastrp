@@ -1,15 +1,12 @@
-function renderAuthUI() {
+(function authSync() {
   const saved = localStorage.getItem("user");
 
-  const loginBtn = get("loginBtn");
-  const userBox = get("user");
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
 
-  // 🔥 SAFE GUARD (NIE ROZWALA STRONY)
-  if (!userBox) return;
-
-  if (!saved) {
+  if (!saved || !userBox) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
-    userBox.innerHTML = "";
+    if (userBox) userBox.innerHTML = "";
     return;
   }
 
@@ -19,43 +16,46 @@ function renderAuthUI() {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
+  // hide login
   if (loginBtn) loginBtn.style.display = "none";
 
-  // 🔥 NIE NADPISUJ jeśli już istnieje (FIX “ZNIKANIA”)
-  if (userBox.dataset.rendered === "1") return;
-  userBox.dataset.rendered = "1";
-
   userBox.innerHTML = `
-    <div class="user-dropdown">
-      <div class="user-trigger" id="userTrigger">
-        <img src="${avatar}" class="user-avatar">
-        <span class="user-name">${user.username}</span>
-      </div>
+    <div class="profile-wrap" id="profileBtn">
+      <img src="${avatar}" style="width:32px;height:32px;border-radius:50%;">
+      <span>${user.username}</span>
+    </div>
 
-      <div class="user-menu" id="userMenu">
-        <button class="logout-btn" id="logoutBtn">Wyloguj się</button>
-      </div>
+    <div class="profile-menu" id="profileMenu">
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="settings.html">⚙ Settings</a>
+      <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
+      <a href="#" id="logoutBtn">🚪 Logout</a>
     </div>
   `;
 
-  const trigger = get("userTrigger");
-  const menu = get("userMenu");
+  const btn = document.getElementById("profileBtn");
+  const menu = document.getElementById("profileMenu");
 
-  if (trigger && menu) {
-    trigger.addEventListener("click", (e) => {
+  if (btn && menu) {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      menu.classList.toggle("active");
+
+      menu.style.display =
+        menu.style.display === "block"
+          ? "none"
+          : "block";
     });
 
     document.addEventListener("click", () => {
-      menu.classList.remove("active");
+      menu.style.display = "none";
     });
   }
 
-  get("logoutBtn")?.addEventListener("click", () => {
+  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
+
     localStorage.removeItem("user");
+
     location.reload();
   });
-}
-
-document.addEventListener("DOMContentLoaded", renderAuthUI);
+})();
