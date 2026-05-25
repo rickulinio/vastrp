@@ -294,3 +294,65 @@ if (canvas && ctx) {
 
   animateParticles();
 }
+
+(function authSync() {
+  const saved = localStorage.getItem("user");
+
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
+
+  if (!saved) {
+    if (loginBtn) loginBtn.style.display = "inline-flex";
+    if (userBox) userBox.style.display = "none";
+    return;
+  }
+
+  const user = JSON.parse(saved);
+
+  const avatar = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  // hide login
+  if (loginBtn) loginBtn.style.display = "none";
+
+  if (!userBox) return;
+
+  userBox.style.display = "block";
+
+  userBox.innerHTML = `
+    <div class="profile-wrap" id="profileBtn">
+      <img src="${avatar}">
+      <span>${user.username}</span>
+    </div>
+
+    <div class="profile-menu" id="profileMenu">
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="settings.html">⚙ Settings</a>
+      <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
+      <a href="#" id="logoutBtn">🚪 Logout</a>
+    </div>
+  `;
+
+  const btn = document.getElementById("profileBtn");
+  const menu = document.getElementById("profileMenu");
+
+  // toggle dropdown
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.style.display =
+      menu.style.display === "block" ? "none" : "block";
+  });
+
+  // close on click outside
+  document.addEventListener("click", () => {
+    if (menu) menu.style.display = "none";
+  });
+
+  // logout
+  document.getElementById("logoutBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem("user");
+    location.reload();
+  });
+})();
