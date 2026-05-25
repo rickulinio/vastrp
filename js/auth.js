@@ -1,7 +1,8 @@
 const CLIENT_ID = "1480598374024483012";
 const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
-/* LOGIN LINK */
+/* ================= LOGIN BUTTON ================= */
+
 const loginBtn = document.getElementById("loginBtn");
 
 if (loginBtn) {
@@ -12,44 +13,103 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
-/* TOKEN */
+/* ================= RENDER USER ================= */
+
+function renderUser(user) {
+  const userBox = document.getElementById("user");
+  const loginBtn = document.getElementById("loginBtn");
+
+  if (!userBox) return;
+
+  const avatarURL = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  // chowamy login
+  if (loginBtn) {
+    loginBtn.style.display = "none";
+  }
+
+  // pokazujemy usera
+  userBox.style.display = "flex";
+
+  const profileBtn = document.getElementById("profileBtn");
+  const profileMenu = document.getElementById("profileMenu");
+
+  /* ===== OPEN / CLOSE ===== */
+
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    profileMenu.classList.toggle("active");
+  });
+
+  /* ===== CLOSE WHEN CLICK OUTSIDE ===== */
+
+  document.addEventListener("click", (e) => {
+    if (!userBox.contains(e.target)) {
+      profileMenu.classList.remove("active");
+    }
+  });
+
+  /* ===== LOGOUT ===== */
+
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  logoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    localStorage.removeItem("user");
+
+    window.location.reload();
+  });
+}
+
+/* ================= TOKEN ================= */
+
 function getToken() {
   if (!window.location.hash) return null;
-  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+
+  return new URLSearchParams(
+    window.location.hash.substring(1)
+  ).get("access_token");
 }
 
 const token = getToken();
 
-/* LOGIN FLOW */
+/* ================= LOGIN FLOW ================= */
+
 if (token) {
-  window.history.replaceState({}, document.title, window.location.pathname);
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
 
   fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   })
     .then(r => r.json())
     .then(user => {
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
 
-      // 🔥 WAŻNE: DELAY zamiast instant redirect
+      renderUser(user);
+
       setTimeout(() => {
-        window.location.href = "https://rickulinio.github.io/vast/";
-      }, 200);
-    })
-    .catch(() => {
-      window.location.href = "https://rickulinio.github.io/vast/";
+window.location.replace("/vast/");
+      }, 500);
     });
 }
 
-/* AUTO LOGIN CHECK */
+/* ================= AUTO LOGIN ================= */
+
 const savedUser = localStorage.getItem("user");
 
 if (savedUser && !token) {
-  console.log("logged:", JSON.parse(savedUser));
+  renderUser(JSON.parse(savedUser));
 }
-
-/* GLOBAL LOGOUT */
-window.logout = function () {
-  localStorage.removeItem("user");
-  window.location.href = "https://rickulinio.github.io/vast/";
-};
