@@ -214,43 +214,10 @@ document.querySelectorAll(".btn-lg").forEach(btn => {
   });
 });
 
-// STARU KOD PARTICLES ZOSTAŁ STĄD USUNIĘTY, ABY UNIKNĄĆ BŁĘDU REDEKLARACJI
-
-const savedUser = localStorage.getItem("user");
-const loginBtn = document.getElementById("loginBtn");
-const userBox = document.getElementById("user");
-
-if (!savedUser) {
-  if (loginBtn) loginBtn.style.display = "inline-flex";
-  if (userBox) userBox.innerHTML = "";
-} else {
-  const user = JSON.parse(savedUser);
-
-  if (loginBtn) loginBtn.style.display = "none";
-
-  const avatar = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  // MINIMAL UI (reszta CSS robi robotę)
-  if (userBox) {
-    userBox.innerHTML = `
-      <div class="user-pill">
-        <img src="${avatar}" class="user-avatar">
-        <span class="user-name">${user.username}</span>
-        <button id="logoutBtn" class="logout-btn">Wyloguj</button>
-      </div>
-    `;
-
-    document.getElementById("logoutBtn")?.addEventListener("click", () => {
-      localStorage.removeItem("user");
-      location.reload();
-    });
-  }
-}
-
+/* ─── AUTH UI (JEDYNE ŹRÓDŁO PRAWDY) ─── */
 function updateAuthUI() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
+
   const loginBtn = document.getElementById("loginBtn");
   const userBox = document.getElementById("user");
 
@@ -262,145 +229,109 @@ function updateAuthUI() {
 
   if (loginBtn) loginBtn.style.display = "none";
 
-  const avatar = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
   if (userBox) {
     userBox.innerHTML = `
-      <div class="user-dropdown">
-        <div class="user-trigger" id="userTrigger">
-          <img src="${avatar}" class="user-avatar">
-          <span class="user-name">${user.username}</span>
-        </div>
-
-        <div class="user-menu" id="userMenu">
-          <button id="logoutBtn" class="logout-btn">Wyloguj się</button>
-        </div>
+      <div class="user-pill">
+        <img src="${user.avatar}" class="user-avatar">
+        <span class="user-name">${user.username}</span>
+        <button id="logoutBtn">Wyloguj</button>
       </div>
     `;
 
-    const trigger = document.getElementById("userTrigger");
-    const menu = document.getElementById("userMenu");
-    const logout = document.getElementById("logoutBtn");
-
-    trigger?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu?.classList.toggle("active");
-    });
-
-    logout?.addEventListener("click", () => {
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
       localStorage.removeItem("user");
       updateAuthUI();
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!userBox.contains(e.target)) {
-        menu?.classList.remove("active");
-      }
     });
   }
 }
 
-/* ─── PARTICLES (NOWY ZINTEGROWANY KOD) ─── */
-// Tutaj const canvas i const ctx są deklarowane po raz pierwszy w pliku.
+/* INIT AUTH */
+updateAuthUI();
+
+/* SYNC */
+window.addEventListener("auth:update", updateAuthUI);
+
+window.addEventListener("storage", (e) => {
+  if (e.key === "user") updateAuthUI();
+});
+
+/* ─── PARTICLES ─── */
 const canvas = document.getElementById("particles");
 const ctx = canvas?.getContext("2d");
 
 if (canvas && ctx) {
-    let mouse = { x: null, y: null };
 
-    // Słuchacz zdarzeń myszy - tylko gdy canvas istnieje
-    window.addEventListener('mousemove', e => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
+  let mouse = { x: null, y: null };
+
+  window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  window.addEventListener('mouseleave', () => {
+    mouse.x = null;
+    mouse.y = null;
+  });
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    const hero = document.querySelector(".hero");
+    canvas.height = hero ? hero.offsetHeight : window.innerHeight;
+  }
+
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const particles = [];
+  const particleCount = 100;
+
+  for (let i = 0; i < particleCount; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5,
+      forceX: 0,
+      forceY: 0
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+
+      if (mouse.x !== null && mouse.y !== null) {
+        let dx = p.x - mouse.x;
+        let dy = p.y - mouse.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 200) {
+          let force = (200 - dist) / 200;
+
+          p.forceX += (dx / dist) * force * 1.5;
+          p.forceY += (dy / dist) * force * 1.5;
+        }
+      }
+
+      p.x += p.dx + p.forceX;
+      p.y += p.dy + p.forceY;
+
+      p.forceX *= 0.92;
+      p.forceY *= 0.92;
+
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.4)";
+      ctx.fill();
     });
 
-    // Resetowanie pozycji myszy, gdy kursor opuści okno (cząsteczki przestaną uciekać)
-    window.addEventListener('mouseleave', () => {
-        mouse.x = null;
-        mouse.y = null;
-    });
+    requestAnimationFrame(animate);
+  }
 
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        const hero = document.querySelector(".hero");
-        // Canvas na wysokość hero lub całego okna, jeśli hero nie ma
-        canvas.height = hero ? hero.offsetHeight : window.innerHeight;
-    }
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    const particles = [];
-    const particleCount = 100; // Zwiększona liczba cząsteczek dla lepszego efektu
-
-    for (let i = 0; i < particleCount; i++) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            r: Math.random() * 2 + 1,
-            // Prędkość bazowa (dx/dy)
-            dx: (Math.random() - 0.5) * 0.5, 
-            dy: (Math.random() - 0.5) * 0.5,
-            // Zmienne na dodatkową siłę odpychania (początkowo zero)
-            forceX: 0,
-            forceY: 0
-        });
-    }
-
-    function animateParticles() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        particles.forEach(p => {
-            // --- LOGIKA ODPYCHANIA (REPULSE) ---
-            if (mouse.x !== null && mouse.y !== null) {
-                let dxMouse = p.x - mouse.x;
-                let dyMouse = p.y - mouse.y;
-                let distance = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-                
-                let repulseRadius = 200; // Zasięg odpychania
-
-                if (distance < repulseRadius) {
-                    // Oblicz siłę odpychania (im bliżej, tym mocniej)
-                    let force = (repulseRadius - distance) / repulseRadius;
-                    let strength = 1.5; // Siła odepchnięcia
-                    
-                    // Dodaj siłę do zmiennych forceX/forceY (a nie bezpośrednio do dx/dy)
-                    p.forceX += (dxMouse / distance) * force * strength;
-                    p.forceY += (dyMouse / distance) * force * strength;
-                }
-            }
-
-            // Aplikuj ruch bazowy + siłę odpychania
-            p.x += p.dx + p.forceX;
-            p.y += p.dy + p.forceY;
-
-            // Stopniowe wygaszanie siły odpychania (tarcia), by cząsteczka wróciła do normy
-            p.forceX *= 0.92;
-            p.forceY *= 0.92;
-
-            // --- ODBIJANIE OD KRAWĘDZI ---
-            if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-            if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-
-            // --- RYSOWANIE ---
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            
-            // Używamy koloru pasującego do orbów (fioletowy glow)
-            ctx.fillStyle = "rgba(255, 255, 255, 0.4)"; 
-            ctx.fill();
-        });
-
-        requestAnimationFrame(animateParticles);
-    }
-
-    animateParticles();
+  animate();
 }
-
-/* START */
-updateAuthUI();
-
-/* UPDATE PO LOGINIE */
-window.addEventListener("auth:update", updateAuthUI);
