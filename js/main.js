@@ -33,6 +33,62 @@ window.addEventListener("load", () => {
 /* ─── SAFE HELPERS ─── */
 const $ = (id) => document.getElementById(id);
 
+/* ─── AUTH (ONLY LOCALSTORAGE, NO AUTH.JS NEEDED) ─── */
+
+const savedUser = localStorage.getItem("user");
+const loginBtn = $("loginBtn");
+const userBox = $("user");
+
+function logout() {
+  localStorage.removeItem("user");
+  location.reload();
+}
+
+function renderUser(user) {
+  if (!userBox) return;
+
+  const avatar = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  if (loginBtn) loginBtn.style.display = "none";
+
+  userBox.innerHTML = `
+    <div class="user-dropdown">
+      <div class="user-trigger" id="userTrigger">
+        <img src="${avatar}" class="user-avatar">
+        <span class="user-name">${user.username}</span>
+      </div>
+
+      <div class="user-menu" id="userMenu">
+        <button class="logout-btn" id="logoutBtn">🚪 Wyloguj się</button>
+      </div>
+    </div>
+  `;
+
+  const trigger = $("userTrigger");
+  const menu = $("userMenu");
+
+  if (trigger && menu) {
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.toggle("active");
+    });
+
+    document.addEventListener("click", () => {
+      menu.classList.remove("active");
+    });
+  }
+
+  $("logoutBtn")?.addEventListener("click", logout);
+}
+
+if (savedUser) {
+  renderUser(JSON.parse(savedUser));
+} else if (loginBtn) {
+  loginBtn.style.display = "inline-flex";
+}
+
 /* ─── RENDER FACTIONS ─── */
 const fg = $("factions-grid");
 
@@ -45,19 +101,11 @@ if (fg && Array.isArray(FACTIONS)) {
     el.innerHTML = `
       <div class="fc-top">
         <div class="fc-icon">${f.icon}</div>
-        <div>
-          <div class="fc-name">${f.name}</div>
-        </div>
+        <div class="fc-name">${f.name}</div>
       </div>
-
       <p class="fc-desc">${f.desc}</p>
-
-      <button
-        class="fc-cta"
-        style="--fc:${f.color};background:${f.color}18;border-color:${f.color}30;"
-        onclick="openModal('${f.key}')"
-      >
-        Złóż Podanie <span>→</span>
+      <button class="fc-cta" onclick="openModal('${f.key}')">
+        Złóż Podanie →
       </button>
     `;
 
@@ -65,14 +113,14 @@ if (fg && Array.isArray(FACTIONS)) {
   });
 }
 
-/* ─── RENDER TEAM ─── */
+/* ─── TEAM ─── */
 const tg = $("team-grid");
 
 if (tg && Array.isArray(TEAM)) {
   TEAM.forEach(m => {
     tg.innerHTML += `
       <div class="team-card reveal">
-        <img class="team-av" src="${m.image}" alt="${m.name}">
+        <img class="team-av" src="${m.image}">
         <div class="team-name">${m.name}</div>
         <div class="team-role">${m.role}</div>
       </div>
@@ -80,12 +128,10 @@ if (tg && Array.isArray(TEAM)) {
   });
 }
 
-/* ─── NAV SCROLL ─── */
+/* ─── NAV ─── */
 window.addEventListener("scroll", () => {
   const nav = $("nav");
-  if (!nav) return;
-
-  nav.classList.toggle("scrolled", scrollY > 20);
+  if (nav) nav.classList.toggle("scrolled", scrollY > 20);
 });
 
 /* ─── COUNTERS ─── */
@@ -118,181 +164,40 @@ const obs = new IntersectionObserver((entries) => {
 
 document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
 
-/* ─── RULE HIGHLIGHT ─── */
-const ruleItems = document.querySelectorAll(".rule-item");
+/* ─── RULES ─── */
+document.querySelectorAll(".rule-item").forEach(item => {
+  item.addEventListener("mouseenter", () => {
+    document.querySelectorAll(".rule-title")
+      .forEach(t => t.classList.remove("active"));
 
-if (ruleItems.length) {
-  const ruleObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        document.querySelectorAll(".rule-title")
-          .forEach(t => t.classList.remove("active"));
-
-        const title = entry.target.querySelector(".rule-title");
-        if (title) title.classList.add("active");
-      }
-    });
-  }, { threshold: 0.6 });
-
-  ruleItems.forEach(item => ruleObserver.observe(item));
-}
-
-/* ─── KEY EFFECT ─── */
-document.querySelectorAll(".key").forEach(key => {
-  key.addEventListener("click", () => {
-    key.classList.toggle("show");
-
-    setTimeout(() => {
-      key.classList.remove("show");
-    }, 1600);
+    const title = item.querySelector(".rule-title");
+    if (title) title.classList.add("active");
   });
 });
 
-/* ─── MOBILE MENU ─── */
+/* ─── MENU ─── */
 const navToggle = $("navToggle");
 const mobileMenu = $("mobileMenu");
 const mobileOverlay = $("mobileOverlay");
 
 function openMenu() {
-  if (!mobileMenu || !mobileOverlay || !navToggle) return;
-
-  mobileMenu.classList.add("active");
-  mobileOverlay.classList.add("active");
-  navToggle.textContent = "✕";
+  mobileMenu?.classList.add("active");
+  mobileOverlay?.classList.add("active");
+  if (navToggle) navToggle.textContent = "✕";
 }
 
 function closeMenu() {
-  if (!mobileMenu || !mobileOverlay || !navToggle) return;
-
-  mobileMenu.classList.remove("active");
-  mobileOverlay.classList.remove("active");
-  navToggle.textContent = "☰";
+  mobileMenu?.classList.remove("active");
+  mobileOverlay?.classList.remove("active");
+  if (navToggle) navToggle.textContent = "☰";
 }
 
-if (navToggle) {
-  navToggle.addEventListener("click", () => {
-    if (mobileMenu?.classList.contains("active")) closeMenu();
-    else openMenu();
-  });
-}
+navToggle?.addEventListener("click", () => {
+  mobileMenu?.classList.contains("active") ? closeMenu() : openMenu();
+});
 
-if (mobileOverlay) mobileOverlay.addEventListener("click", closeMenu);
+mobileOverlay?.addEventListener("click", closeMenu);
 
 document.querySelectorAll(".mobile-menu a").forEach(a => {
   a.addEventListener("click", closeMenu);
 });
-
-/* ─── CURSOR GLOW ─── */
-const glow = document.querySelector(".cursor-glow");
-
-if (glow) {
-  window.addEventListener("mousemove", e => {
-    glow.animate({
-      left: `${e.clientX}px`,
-      top: `${e.clientY}px`
-    }, {
-      duration: 350,
-      fill: "forwards"
-    });
-  });
-}
-
-/* ─── MAGNETIC BUTTONS ─── */
-document.querySelectorAll(".btn-lg").forEach(btn => {
-  btn.addEventListener("mousemove", e => {
-    const rect = btn.getBoundingClientRect();
-
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-
-    btn.style.transform =
-      `translate(${x * 0.12}px, ${y * 0.18}px)`;
-  });
-
-  btn.addEventListener("mouseleave", () => {
-    btn.style.transform = "";
-  });
-});
-
-/* ─── PARTICLES ─── */
-const canvas = document.getElementById("particles");
-const ctx = canvas?.getContext("2d");
-
-if (canvas && ctx) {
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    const hero = document.querySelector(".hero");
-    canvas.height = hero ? hero.offsetHeight : window.innerHeight;
-  }
-
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
-
-  const particles = [];
-
-  for (let i = 0; i < 60; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 2 + 1,
-      dx: (Math.random() - 0.5) * 0.4,
-      dy: (Math.random() - 0.5) * 0.4
-    });
-  }
-
-  function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach(p => {
-      p.x += p.dx;
-      p.y += p.dy;
-
-      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255,255,255,0.5)";
-      ctx.fill();
-    });
-
-    requestAnimationFrame(animateParticles);
-  }
-
-  animateParticles();
-}
-
-/* ─── SIMPLE AUTH (NO LAYOUT, ONLY LOGOUT BUTTON) ─── */
-
-const savedUser = localStorage.getItem("user");
-const loginBtn = document.getElementById("loginBtn");
-const userBox = document.getElementById("user");
-
-if (!savedUser) {
-  if (loginBtn) loginBtn.style.display = "inline-flex";
-  if (userBox) userBox.innerHTML = "";
-} else {
-  const user = JSON.parse(savedUser);
-
-  if (loginBtn) loginBtn.style.display = "none";
-
-  const avatar = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  // MINIMAL UI (reszta CSS robi robotę)
-  if (userBox) {
-    userBox.innerHTML = `
-      <div class="user-pill">
-        <img src="${avatar}" class="user-avatar">
-        <span class="user-name">${user.username}</span>
-        <button id="logoutBtn" class="logout-btn">Wyloguj</button>
-      </div>
-    `;
-
-    document.getElementById("logoutBtn")?.addEventListener("click", () => {
-      localStorage.removeItem("user");
-      location.reload();
-    });
-  }
-}

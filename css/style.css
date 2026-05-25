@@ -2099,41 +2099,65 @@ body {
   }
 }
 
-.user-simple {
+.user-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-trigger {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px 12px;
   border-radius: 12px;
   background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.user-trigger:hover {
+  transform: scale(1.03);
 }
 
 .user-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2);
 }
 
-.user-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
-}
+.user-menu {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: rgba(20,20,20,0.9);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 140px;
 
-.logout-btn {
-  margin-left: 10px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,0,80,0.4);
-  background: rgba(255,0,80,0.1);
-  color: white;
-  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
   transition: 0.2s;
 }
 
+.user-menu.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255,0,80,0.15);
+  color: white;
+  cursor: pointer;
+}
+
 .logout-btn:hover {
-  background: rgba(255,0,80,0.25);
-  transform: scale(1.05);
+  background: rgba(255,0,80,0.3);
 }
