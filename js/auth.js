@@ -12,13 +12,15 @@ function clearUser() {
 
 /* TOKEN */
 function getTokenFromHash() {
-  if (!window.location.hash) return null;
-  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+  const hash = window.location.hash.substring(1);
+  if (!hash) return null;
+  const params = new URLSearchParams(hash);
+  return params.get("access_token");
 }
 
-/* CLEAN URL */
+/* CLEAN URL - czyści hash bez przeładowania strony */
 function cleanUrl() {
-  window.history.replaceState({}, document.title, window.location.pathname);
+  window.history.replaceState(null, "", window.location.pathname);
 }
 
 /* EVENT */
@@ -37,20 +39,29 @@ async function fetchDiscordUser(token) {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  if (!res.ok) throw new Error("Discord API error");
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || `Discord API error: ${res.status}`);
+  }
   return res.json();
 }
 
-/* LOGIN FLOW (FIXED) */
+/* LOGIN FLOW */
 async function handleLogin() {
   const token = getTokenFromHash();
 
-  if (!token) return;
+  // Jeśli nie ma tokena, sprawdzamy czy mamy już zapisanego użytkownika
+  if (!token) {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) triggerAuthUpdate();
+    return;
+  }
 
   try {
+    console.log("Przetwarzanie tokena...");
     const user = await fetchDiscordUser(token);
 
-    if (!user?.id) throw new Error("Invalid user");
+    if (!user?.id) throw new Error("Invalid user response");
 
     const userData = {
       id: user.id,
@@ -61,18 +72,14 @@ async function handleLogin() {
     };
 
     saveUser(userData);
-
-    cleanUrl();
-    triggerAuthUpdate();
-
-    // mały delay żeby eventy zdążyły
-    setTimeout(() => {
-      window.location.href = BASE_URL;
-    }, 150);
+    console.log("Zalogowano:", userData.username);
 
   } catch (e) {
     console.error("LOGIN ERROR:", e);
     clearUser();
+  } finally {
+    // Czyścimy URL z tokena niezależnie od wyniku (sukces/błąd)
+    cleanUrl();
     triggerAuthUpdate();
   }
 }
@@ -80,7 +87,9 @@ async function handleLogin() {
 /* INIT */
 window.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) loginBtn.href = getDiscordLoginURL();
+  if (loginBtn) {
+    loginBtn.href = getDiscordLoginURL();
+  }
 
   handleLogin();
 });
