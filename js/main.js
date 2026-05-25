@@ -1,8 +1,8 @@
 function renderAuthUI() {
   const saved = localStorage.getItem("user");
 
-  const loginBtn = get("loginBtn");
-  const userBox = get("user");
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
 
   if (!saved) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
@@ -31,22 +31,28 @@ function renderAuthUI() {
     </div>
   `;
 
-  const trigger = get("userTrigger");
-  const menu = get("userMenu");
+  const trigger = document.getElementById("userTrigger");
+  const menu = document.getElementById("userMenu");
 
-  trigger?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    menu.classList.toggle("active");
-  });
+  if (trigger && menu) {
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.toggle("active");
+    });
 
-  document.addEventListener("click", () => {
-    menu?.classList.remove("active");
-  });
+    document.addEventListener("click", () => {
+      menu.classList.remove("active");
+    });
+  }
 
-  get("logoutBtn")?.addEventListener("click", () => {
-    localStorage.removeItem("user");
-    window.dispatchEvent(new Event("auth:update"));
-  });
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("user");
+      window.dispatchEvent(new Event("auth:update"));
+    });
+  }
 }
 
 /* ================= AUTO INIT ================= */
