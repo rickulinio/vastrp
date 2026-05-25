@@ -1,8 +1,3 @@
-/* ================= SAFE HELPER ================= */
-const get = (id) => document.getElementById(id);
-
-/* ================= LOADER ================= */
-
 let progress = 0;
 
 const progressText = document.querySelector(".loader-progress-text");
@@ -35,12 +30,44 @@ window.addEventListener("load", () => {
   }, 1800);
 });
 
-/* ================= FACTIONS ================= */
+/* ─── SAFE HELPERS ─── */
+const $ = (id) => document.getElementById(id);
 
-const fg = get("factions-grid");
+/* ─── AUTH SYNC (🔥 FIX LOGIN NA HOME) ─── */
+(function authSync() {
+  const savedUser = localStorage.getItem("user");
+  if (!savedUser) return;
 
-if (fg && Array.isArray(window.FACTIONS)) {
-  window.FACTIONS.forEach(f => {
+  const user = JSON.parse(savedUser);
+
+  const loginBtn = $("loginBtn");
+  const userBox = $("user");
+
+  const avatarURL = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  if (loginBtn) loginBtn.style.display = "none";
+
+  if (userBox) {
+    userBox.style.display = "flex";
+
+    userBox.innerHTML = `
+      <div class="profile">
+        <img class="avatar" src="${avatarURL}" />
+        <span>${user.username}</span>
+      </div>
+    `;
+
+    userBox.title = user.username;
+  }
+})();
+
+/* ─── RENDER FACTIONS ─── */
+const fg = $("factions-grid");
+
+if (fg && Array.isArray(FACTIONS)) {
+  FACTIONS.forEach(f => {
     const el = document.createElement("div");
     el.className = "faction-card reveal";
     el.style.setProperty("--fc", f.color);
@@ -48,13 +75,19 @@ if (fg && Array.isArray(window.FACTIONS)) {
     el.innerHTML = `
       <div class="fc-top">
         <div class="fc-icon">${f.icon}</div>
-        <div class="fc-name">${f.name}</div>
+        <div>
+          <div class="fc-name">${f.name}</div>
+        </div>
       </div>
 
       <p class="fc-desc">${f.desc}</p>
 
-      <button class="fc-cta" onclick="openModal('${f.key}')">
-        Złóż Podanie →
+      <button
+        class="fc-cta"
+        style="--fc:${f.color};background:${f.color}18;border-color:${f.color}30;"
+        onclick="openModal('${f.key}')"
+      >
+        Złóż Podanie <span>→</span>
       </button>
     `;
 
@@ -62,12 +95,11 @@ if (fg && Array.isArray(window.FACTIONS)) {
   });
 }
 
-/* ================= TEAM ================= */
+/* ─── RENDER TEAM ─── */
+const tg = $("team-grid");
 
-const tg = get("team-grid");
-
-if (tg && Array.isArray(window.TEAM)) {
-  window.TEAM.forEach(m => {
+if (tg && Array.isArray(TEAM)) {
+  TEAM.forEach(m => {
     tg.innerHTML += `
       <div class="team-card reveal">
         <img class="team-av" src="${m.image}" alt="${m.name}">
@@ -78,17 +110,15 @@ if (tg && Array.isArray(window.TEAM)) {
   });
 }
 
-/* ================= NAV SCROLL ================= */
-
+/* ─── NAV SCROLL ─── */
 window.addEventListener("scroll", () => {
-  const nav = get("nav");
+  const nav = $("nav");
   if (!nav) return;
 
   nav.classList.toggle("scrolled", scrollY > 20);
 });
 
-/* ================= COUNTERS ================= */
-
+/* ─── COUNTERS ─── */
 function countUp(el, to, dur) {
   if (!el) return;
 
@@ -103,12 +133,11 @@ function countUp(el, to, dur) {
 }
 
 setTimeout(() => {
-  countUp(get("s-players"), 47, 1200);
-  countUp(get("s-discord"), 1284, 1800);
+  countUp($("s-players"), 47, 1200);
+  countUp($("s-discord"), 1284, 1800);
 }, 300);
 
-/* ================= REVEAL ================= */
-
+/* ─── REVEAL ─── */
 const obs = new IntersectionObserver((entries) => {
   entries.forEach((e, i) => {
     if (e.isIntersecting) {
@@ -117,10 +146,10 @@ const obs = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.08 });
 
-document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+document.querySelectorAll(".reveal")
+  .forEach(el => obs.observe(el));
 
-/* ================= RULE HIGHLIGHT ================= */
-
+/* ─── RULE HIGHLIGHT ─── */
 const ruleItems = document.querySelectorAll(".rule-item");
 
 if (ruleItems.length) {
@@ -139,8 +168,7 @@ if (ruleItems.length) {
   ruleItems.forEach(item => ruleObserver.observe(item));
 }
 
-/* ================= KEY EFFECT ================= */
-
+/* ─── KEY EFFECT ─── */
 document.querySelectorAll(".key").forEach(key => {
   key.addEventListener("click", () => {
     key.classList.toggle("show");
@@ -151,11 +179,10 @@ document.querySelectorAll(".key").forEach(key => {
   });
 });
 
-/* ================= MOBILE MENU ================= */
-
-const navToggle = get("navToggle");
-const mobileMenu = get("mobileMenu");
-const mobileOverlay = get("mobileOverlay");
+/* ─── MOBILE MENU ─── */
+const navToggle = $("navToggle");
+const mobileMenu = $("mobileMenu");
+const mobileOverlay = $("mobileOverlay");
 
 function openMenu() {
   if (!mobileMenu || !mobileOverlay || !navToggle) return;
@@ -188,8 +215,7 @@ document.querySelectorAll(".mobile-menu a").forEach(a => {
   a.addEventListener("click", closeMenu);
 });
 
-/* ================= CURSOR ================= */
-
+/* ─── CURSOR GLOW ─── */
 const glow = document.querySelector(".cursor-glow");
 
 if (glow) {
@@ -198,14 +224,13 @@ if (glow) {
       left: `${e.clientX}px`,
       top: `${e.clientY}px`
     }, {
-      duration: 300,
+      duration: 350,
       fill: "forwards"
     });
   });
 }
 
-/* ================= MAGNETIC BUTTONS ================= */
-
+/* ─── MAGNETIC BUTTONS ─── */
 document.querySelectorAll(".btn-lg").forEach(btn => {
   btn.addEventListener("mousemove", e => {
     const rect = btn.getBoundingClientRect();
@@ -222,8 +247,7 @@ document.querySelectorAll(".btn-lg").forEach(btn => {
   });
 });
 
-/* ================= PARTICLES ================= */
-
+/* ─── PARTICLES ─── */
 const canvas = document.getElementById("particles");
 const ctx = canvas?.getContext("2d");
 
@@ -271,13 +295,11 @@ if (canvas && ctx) {
   animateParticles();
 }
 
-/* ================= AUTH UI SYNC (ONLY DISPLAY) ================= */
-
-function renderAuthUI() {
+(function authSync() {
   const saved = localStorage.getItem("user");
 
-  const loginBtn = get("loginBtn");
-  const userBox = get("user");
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
 
   if (!saved || !userBox) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
@@ -291,39 +313,42 @@ function renderAuthUI() {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
+  // hide login
   if (loginBtn) loginBtn.style.display = "none";
 
+  // IMPORTANT: NIE nadpisujemy całego nav layoutu
   userBox.innerHTML = `
-    <div class="user-dropdown">
-      <div class="user-trigger" id="userTrigger">
-        <img src="${avatar}" class="user-avatar">
-        <span class="user-name">${user.username}</span>
-      </div>
+    <div class="profile-wrap" id="profileBtn">
+      <img src="${avatar}" style="width:32px;height:32px;border-radius:50%;">
+      <span>${user.username}</span>
+    </div>
 
-      <div class="user-menu" id="userMenu">
-        <button class="logout-btn" id="logoutBtn">Wyloguj się</button>
-      </div>
+    <div class="profile-menu" id="profileMenu">
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="settings.html">⚙ Settings</a>
+      <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
+      <a href="#" id="logoutBtn">🚪 Logout</a>
     </div>
   `;
 
-  const trigger = get("userTrigger");
-  const menu = get("userMenu");
+  const btn = document.getElementById("profileBtn");
+  const menu = document.getElementById("profileMenu");
 
-  if (trigger && menu) {
-    trigger.addEventListener("click", (e) => {
+  if (btn && menu) {
+    btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      menu.classList.toggle("active");
+      menu.style.display =
+        menu.style.display === "block" ? "none" : "block";
     });
 
     document.addEventListener("click", () => {
-      menu.classList.remove("active");
+      menu.style.display = "none";
     });
   }
 
-  get("logoutBtn")?.addEventListener("click", () => {
+  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
     localStorage.removeItem("user");
     location.reload();
   });
-}
-
-renderAuthUI();
+})();
