@@ -2099,51 +2099,25 @@ body {
   }
 }
 
-.user-dropdown {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.user-trigger {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.06);
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.user-trigger:hover {
-  transform: scale(1.03);
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-}
-
 .user-menu {
   position: absolute;
-  top: 45px;
+  top: 52px;
   right: 0;
 
-  background: rgba(20,20,20,0.92);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
+  background: rgba(15, 15, 18, 0.75);
+  backdrop-filter: blur(14px);
 
-  padding: 6px;
-  min-width: 160px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+
+  padding: 10px;
+  min-width: 180px;
 
   opacity: 0;
-  transform: translateY(-10px) scale(0.98);
+  transform: translateY(-10px) scale(0.96);
   pointer-events: none;
 
   transition: 0.25s ease;
-  transform-origin: top;
 }
 
 .user-menu.active {
@@ -2152,19 +2126,45 @@ body {
   pointer-events: auto;
 }
 
-.logout-btn {
-  width: 100%;
-  padding: 8px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255,0,80,0.12);
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
-  text-align: left;
+/* 🔥 ODSTĘP + LEPSZY LAYOUT */
+.user-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
+/* 🔥 DYMIONY BUTTON */
+.logout-btn {
+  width: 100%;
+  padding: 10px 12px;
+
+  border: 1px solid rgba(255, 70, 120, 0.25);
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 80, 0.18),
+    rgba(255, 0, 80, 0.05)
+  );
+
+  color: white;
+  cursor: pointer;
+
+  transition: 0.25s ease;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* hover glow */
 .logout-btn:hover {
-  background: rgba(255,0,80,0.25);
   transform: translateX(4px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 80, 0.35),
+    rgba(255, 0, 80, 0.1)
+  );
+
+  box-shadow: 0 0 18px rgba(255, 0, 80, 0.25);
 }
