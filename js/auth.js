@@ -1,7 +1,7 @@
 const CLIENT_ID = "1480598374024483012";
 const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
-/* ================= LOGIN BUTTON ================= */
+/* ================= LOGIN LINK ================= */
 
 const loginBtn = document.getElementById("loginBtn");
 
@@ -13,56 +13,23 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
-/* ================= RENDER USER ================= */
+/* ================= STORAGE ================= */
 
-function renderUser(user) {
-  const userBox = document.getElementById("user");
-  const loginBtn = document.getElementById("loginBtn");
+function saveUser(user) {
+  localStorage.setItem("user", JSON.stringify(user));
+}
 
-  if (!userBox) return;
-
-  const avatarURL = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  // chowamy login
-  if (loginBtn) {
-    loginBtn.style.display = "none";
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user"));
+  } catch {
+    return null;
   }
+}
 
-  // pokazujemy usera
-  userBox.style.display = "flex";
-
-  const profileBtn = document.getElementById("profileBtn");
-  const profileMenu = document.getElementById("profileMenu");
-
-  /* ===== OPEN / CLOSE ===== */
-
-  profileBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-
-    profileMenu.classList.toggle("active");
-  });
-
-  /* ===== CLOSE WHEN CLICK OUTSIDE ===== */
-
-  document.addEventListener("click", (e) => {
-    if (!userBox.contains(e.target)) {
-      profileMenu.classList.remove("active");
-    }
-  });
-
-  /* ===== LOGOUT ===== */
-
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  logoutBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-
-    localStorage.removeItem("user");
-
-    window.location.reload();
-  });
+function logout() {
+  localStorage.removeItem("user");
+  location.reload();
 }
 
 /* ================= TOKEN ================= */
@@ -80,11 +47,7 @@ const token = getToken();
 /* ================= LOGIN FLOW ================= */
 
 if (token) {
-  window.history.replaceState(
-    {},
-    document.title,
-    window.location.pathname
-  );
+  window.history.replaceState({}, document.title, window.location.pathname);
 
   fetch("https://discord.com/api/users/@me", {
     headers: {
@@ -93,23 +56,17 @@ if (token) {
   })
     .then(r => r.json())
     .then(user => {
-      localStorage.setItem(
-        "user",
-        JSON.stringify(user)
-      );
-
-      renderUser(user);
+      saveUser(user);
 
       setTimeout(() => {
-window.location.replace("/vast/");
-      }, 500);
+        window.location.href = "https://rickulinio.github.io/vast/";
+      }, 300);
     });
 }
 
-/* ================= AUTO LOGIN ================= */
+/* ================= EXPORT SIMPLE STATE ================= */
 
-const savedUser = localStorage.getItem("user");
-
-if (savedUser && !token) {
-  renderUser(JSON.parse(savedUser));
-}
+window.AUTH = {
+  getUser,
+  logout
+};
