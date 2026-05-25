@@ -1,5 +1,5 @@
 const CLIENT_ID = "1480598374024483012";
-const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
+const BASE_URL = "https://rickulinio.github.io/vast/";
 
 /* ================= LOGIN BUTTON ================= */
 
@@ -8,7 +8,7 @@ const loginBtn = document.getElementById("loginBtn");
 if (loginBtn) {
   loginBtn.href =
     `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+    `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
     `&response_type=token` +
     `&scope=identify`;
 }
@@ -27,7 +27,7 @@ function getSavedUser() {
   }
 }
 
-/* ================= GET TOKEN ================= */
+/* ================= TOKEN ================= */
 
 function getToken() {
   if (!window.location.hash) return null;
@@ -39,6 +39,7 @@ const token = getToken();
 /* ================= LOGIN FLOW ================= */
 
 if (token) {
+  // usuń hash z URL
   window.history.replaceState({}, document.title, window.location.pathname);
 
   fetch("https://discord.com/api/users/@me", {
@@ -48,26 +49,24 @@ if (token) {
   })
     .then(r => r.json())
     .then(user => {
-      if (!user?.id) throw new Error("bad user");
+      if (!user?.id) throw new Error("invalid user");
 
       saveUser(user);
 
-      // ❗ NIE renderuj tutaj UI (MAIN to robi)
-      // ❗ tylko zapis + redirect
-
+      // MAŁY DELAY żeby localStorage się zapisał
       setTimeout(() => {
-        window.location.replace("https://rickulinio.github.io/vast/");
-      }, 200);
+        window.location.href = BASE_URL;
+      }, 150);
     })
     .catch(() => {
       localStorage.removeItem("user");
     });
 }
 
-/* ================= AUTO GUARD ================= */
+/* ================= AUTO REDIRECT ================= */
 
 const saved = getSavedUser();
 
 if (saved && window.location.pathname.includes("login.html")) {
-  window.location.replace("https://rickulinio.github.io/vast/");
+  window.location.replace(BASE_URL);
 }
