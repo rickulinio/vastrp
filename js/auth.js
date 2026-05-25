@@ -1,6 +1,4 @@
 const CLIENT_ID = "1480598374024483012";
-
-/* ================= BASE ================= */
 const BASE_URL = "https://rickulinio.github.io/vast/";
 
 /* ================= LOGIN LINK ================= */
@@ -15,14 +13,13 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
-/* ================= TOKEN ================= */
+/* ================= GET TOKEN ================= */
 
 function getToken() {
   if (!window.location.hash) return null;
 
-  return new URLSearchParams(
-    window.location.hash.substring(1)
-  ).get("access_token");
+  const params = new URLSearchParams(window.location.hash.substring(1));
+  return params.get("access_token");
 }
 
 const token = getToken();
@@ -47,18 +44,23 @@ if (token) {
     .then(user => {
       localStorage.setItem("user", JSON.stringify(user));
 
-      // 🔥 ALWAYS GO HOME (NO login.html EVER)
-      window.location.href = BASE_URL;
+      // 🔥 NAJWAŻNIEJSZE: zawsze ROOT
+      window.location.replace(BASE_URL);
     })
     .catch(() => {
       localStorage.removeItem("user");
     });
 }
 
-/* ================= SAFETY GUARD ================= */
+/* ================= AUTO FIX LOOP ================= */
 
 const savedUser = localStorage.getItem("user");
 
-if (savedUser && window.location.pathname.includes("login.html")) {
-  window.location.replace(BASE_URL);
+if (savedUser) {
+  const isLoginPage = window.location.pathname.includes("login.html");
+
+  // jeśli ktoś przypadkiem wpadł na login.html → cofka
+  if (isLoginPage) {
+    window.location.replace(BASE_URL);
+  }
 }

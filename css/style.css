@@ -2099,34 +2099,61 @@ body {
   }
 }
 
-.logout-btn {
-  width: 100%;
-  padding: 11px 12px;
+.user-menu {
+  position: absolute;
+  top: 52px;
+  right: 0;
 
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 10px;
+  min-width: 180px;
+
+  background: rgba(15, 15, 18, 0.75);
+  backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+
+  opacity: 0;
+  transform: translateY(-10px) scale(0.96);
+  pointer-events: none;
+
+  transition: 0.25s ease;
+}
+
+.user-menu.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.logout-btn {
+  padding: 11px 12px;
   border-radius: 12px;
+
   border: 1px solid rgba(255, 60, 110, 0.25);
 
   background: linear-gradient(
     135deg,
     rgba(255, 0, 80, 0.18),
-    rgba(255, 0, 80, 0.04)
+    rgba(255, 0, 80, 0.05)
   );
 
   color: #fff;
   cursor: pointer;
 
   display: flex;
-  align-items: center;
   justify-content: space-between;
-
-  font-weight: 500;
+  align-items: center;
 
   transition: 0.25s ease;
-  position: relative;
   overflow: hidden;
+  position: relative;
 }
 
-/* DYM GLOW */
 .logout-btn::before {
   content: "";
   position: absolute;
@@ -2144,22 +2171,11 @@ body {
 
 .logout-btn:hover {
   transform: translateX(5px);
-  border-color: rgba(255, 80, 140, 0.5);
   box-shadow: 0 0 22px rgba(255, 0, 80, 0.25);
 }
 
 .logout-btn:hover::before {
   opacity: 1;
-}
-
-.logout-btn:active {
-  transform: translateX(2px) scale(0.98);
-}
-
-.user-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .user-dropdown {
