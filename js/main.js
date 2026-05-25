@@ -5,12 +5,13 @@ const $ = (id) => document.getElementById(id);
 (function authSync() {
   const savedUser = localStorage.getItem("user");
 
-  const loginBtn = $("loginBtn");
-  const userBox = $("user");
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
 
+  // brak usera
   if (!savedUser) {
-    if (loginBtn) loginBtn.style.display = "inline-block";
-    if (userBox) userBox.style.display = "none";
+    if (loginBtn) loginBtn.style.display = "inline-flex";
+    if (userBox) userBox.innerHTML = "";
     return;
   }
 
@@ -20,18 +21,42 @@ const $ = (id) => document.getElementById(id);
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  // hide login
-  if (loginBtn) loginBtn.style.display = "none";
+  // 🔥 HARD HIDE LOGIN
+  if (loginBtn) {
+    loginBtn.style.setProperty("display", "none", "important");
+  }
 
-  // show profile
+  // 🔥 SHOW PROFILE
   if (userBox) {
-    userBox.style.display = "flex";
+    userBox.style.setProperty("display", "flex", "important");
+
     userBox.innerHTML = `
-      <div class="profile" title="${user.username}">
-        <img class="avatar" src="${avatarURL}" />
-        <span>${user.username}</span>
+      <div class="profile-dropdown">
+        <div class="profile-trigger">
+          <img src="${avatarURL}" class="avatar-small">
+          <span>${user.username}</span>
+        </div>
+
+        <div class="dropdown-menu">
+          <a href="settings.html">⚙ Settings</a>
+          <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
+          <a href="#" id="logoutBtn">🚪 Logout</a>
+        </div>
       </div>
     `;
+
+    const trigger = userBox.querySelector(".profile-trigger");
+    const dropdown = userBox.querySelector(".dropdown-menu");
+
+    trigger?.addEventListener("click", () => {
+      dropdown.classList.toggle("active");
+    });
+
+    userBox.querySelector("#logoutBtn")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("user");
+      location.reload();
+    });
   }
 })();
 
