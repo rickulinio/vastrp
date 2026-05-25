@@ -1,6 +1,6 @@
 const CLIENT_ID = "1480598374024483012";
 
-/* ================= BASE URL ================= */
+/* ================= BASE ================= */
 const BASE_URL = "https://rickulinio.github.io/vast/";
 
 /* ================= LOGIN LINK ================= */
@@ -8,11 +8,9 @@ const BASE_URL = "https://rickulinio.github.io/vast/";
 const loginBtn = document.getElementById("loginBtn");
 
 if (loginBtn) {
-  const REDIRECT_URI = `${BASE_URL}`;
-
   loginBtn.href =
     `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+    `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
     `&response_type=token` +
     `&scope=identify`;
 }
@@ -32,11 +30,7 @@ const token = getToken();
 /* ================= CLEAN URL ================= */
 
 function cleanUrl() {
-  window.history.replaceState(
-    {},
-    document.title,
-    window.location.pathname
-  );
+  window.history.replaceState({}, document.title, window.location.pathname);
 }
 
 /* ================= LOGIN FLOW ================= */
@@ -53,22 +47,18 @@ if (token) {
     .then(user => {
       localStorage.setItem("user", JSON.stringify(user));
 
-      // 🔥 HARD FIX - ALWAYS ROOT
-      window.location.replace(BASE_URL);
+      // 🔥 ALWAYS GO HOME (NO login.html EVER)
+      window.location.href = BASE_URL;
     })
     .catch(() => {
       localStorage.removeItem("user");
     });
 }
 
-/* ================= AUTO RESTORE ================= */
+/* ================= SAFETY GUARD ================= */
 
 const savedUser = localStorage.getItem("user");
 
-if (savedUser && !token) {
-  // UI handled in main.js
-  // optional safety redirect (prevents login.html loop)
-  if (window.location.pathname.includes("login.html")) {
-    window.location.replace(BASE_URL);
-  }
+if (savedUser && window.location.pathname.includes("login.html")) {
+  window.location.replace(BASE_URL);
 }

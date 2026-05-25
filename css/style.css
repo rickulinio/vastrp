@@ -2126,7 +2126,7 @@ body {
   overflow: hidden;
 }
 
-/* DYM / GLOW */
+/* DYM GLOW */
 .logout-btn::before {
   content: "";
   position: absolute;
@@ -2156,9 +2156,14 @@ body {
   transform: translateX(2px) scale(0.98);
 }
 
-/* odstęp w menu */
 .user-menu {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.user-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
