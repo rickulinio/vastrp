@@ -31,7 +31,11 @@ function getTokenFromHash() {
 /* ================= CLEAN URL ================= */
 
 function cleanUrl() {
-  window.history.replaceState({}, document.title, window.location.pathname);
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
 }
 
 /* ================= EVENT ================= */
@@ -40,61 +44,103 @@ function triggerAuthUpdate() {
   window.dispatchEvent(new Event("auth:update"));
 }
 
-/* ================= INIT ================= */
+/* ================= LOGIN URL ================= */
 
-window.addEventListener("DOMContentLoaded", () => {
-  const loginBtn = document.getElementById("loginBtn");
+function getDiscordLoginURL() {
+  return (
+    `https://discord.com/oauth2/authorize` +
+    `?client_id=${CLIENT_ID}` +
+    `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
+    `&response_type=token` +
+    `&scope=identify`
+  );
+}
 
-  /* LOGIN LINK */
-  if (loginBtn) {
-    const discordAuthURL =
-      `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-      `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
-      `&response_type=token` +
-      `&scope=identify`;
+/* ================= FETCH USER ================= */
 
-    loginBtn.href = discordAuthURL;
-  }
-
-  /* LOGIN FLOW */
-  const token = getTokenFromHash();
-
-  if (token) {
-    cleanUrl();
-
-    fetch("https://discord.com/api/users/@me", {
+async function fetchDiscordUser(token) {
+  const response = await fetch(
+    "https://discord.com/api/users/@me",
+    {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    })
-      .then(r => r.json())
-      .then(user => {
-        if (!user?.id) throw new Error("Invalid user");
+    }
+  );
 
-        saveUser({
-          id: user.id,
-          username: user.username,
-          avatar: user.avatar,
-        });
-
-        // 🔥 WAŻNE: natychmiast UI update
-        triggerAuthUpdate();
-
-        // lekki delay żeby event zdążył odpalić
-        setTimeout(() => {
-          window.location.replace(BASE_URL);
-        }, 100);
-      })
-      .catch(() => {
-        clearUser();
-        triggerAuthUpdate();
-      });
+  if (!response.ok) {
+    throw new Error(`Discord API Error: ${response.status}`);
   }
 
+  return await response.json();
+}
+
+/* ================= LOGIN FLOW ================= */
+
+async function handleLogin() {
+  const token = getTokenFromHash();
+
+  if (!token) return;
+
+  console.log("TOKEN:", token);
+
+  try {
+    const user = await fetchDiscordUser(token);
+
+    console.log("USER:", user);
+
+    if (!user?.id) {
+      throw new Error("Invalid user");
+    }
+
+    saveUser({
+      id: user.id,
+      username: user.username,
+      avatar: user.avatar,
+    });
+
+    // URL czyścimy DOPIERO po zapisaniu
+    cleanUrl();
+
+    // update UI
+    triggerAuthUpdate();
+
+    // redirect
+    window.location.replace(BASE_URL);
+
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+
+    clearUser();
+
+    triggerAuthUpdate();
+  }
+}
+
+/* ================= INIT ================= */
+
+window.addEventListener("DOMContentLoaded", async () => {
+
+  /* LOGIN BUTTON */
+
+  const loginBtn = document.getElementById("loginBtn");
+
+  if (loginBtn) {
+    loginBtn.href = getDiscordLoginURL();
+  }
+
+  /* HANDLE LOGIN */
+
+  await handleLogin();
+
   /* AUTO REDIRECT */
+
   const saved = getSavedUser();
 
-  if (saved && window.location.pathname.includes("login.html")) {
+  if (
+    saved &&
+    window.location.pathname.includes("login.html")
+  ) {
     window.location.replace(BASE_URL);
   }
 });
