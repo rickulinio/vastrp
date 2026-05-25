@@ -22,22 +22,98 @@ function renderUser(user) {
   const loginBtn = document.getElementById("loginBtn");
   const userBox = document.getElementById("user");
 
-  if (loginBtn) {
-    loginBtn.style.display = "none"; // 🔥 UKRYWASZ LOGIN
-  }
+  if (loginBtn) loginBtn.style.display = "none";
+  if (!userBox) return;
 
-  if (userBox) {
-    userBox.style.display = "flex";
-    userBox.innerHTML = `
-      <div class="profile">
-        <img class="avatar" src="${avatarURL}" />
-        <p>${user.username}</p>
-      </div>
-    `;
+  userBox.style.display = "flex";
 
-    // 🔥 hover nick (prosto)
-    userBox.title = user.username;
-  }
+  userBox.innerHTML = `
+    <div class="profile">
+      <img class="avatar" src="${avatarURL}" />
+      <span>${user.username}</span>
+    </div>
+
+    <div class="dropdown">
+      <a href="profile.html">👤 Profil</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
+      <a href="#" id="logoutBtn">🚪 Logout</a>
+    </div>
+  `;
+
+  // toggle dropdown
+  userBox.onclick = () => {
+    userBox.classList.toggle("active");
+  };
+
+  // logout
+  setTimeout(() => {
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.onclick = (e) => {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        location.reload();
+      };
+    }
+  }, 0);
+
+  // close when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!userBox.contains(e.target)) {
+      userBox.classList.remove("active");
+    }
+  });
+}function renderUser(user) {
+  const avatarURL = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  const loginBtn = document.getElementById("loginBtn");
+  const userBox = document.getElementById("user");
+
+  if (loginBtn) loginBtn.style.display = "none";
+  if (!userBox) return;
+
+  userBox.style.display = "flex";
+
+  userBox.innerHTML = `
+    <div class="profile">
+      <img class="avatar" src="${avatarURL}" />
+      <span>${user.username}</span>
+    </div>
+
+    <div class="dropdown">
+      <a href="profile.html">👤 Profil</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
+      <a href="#" id="logoutBtn">🚪 Logout</a>
+    </div>
+  `;
+
+  // toggle dropdown
+  userBox.onclick = () => {
+    userBox.classList.toggle("active");
+  };
+
+  // logout
+  setTimeout(() => {
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.onclick = (e) => {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        location.reload();
+      };
+    }
+  }, 0);
+
+  // close when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!userBox.contains(e.target)) {
+      userBox.classList.remove("active");
+    }
+  });
 }
 
 // ================= TOKEN =================

@@ -1795,3 +1795,62 @@ body {
 .nav-profile:hover::after {
   opacity: 1;
 }
+
+.nav-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* avatar */
+.nav-user .profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-user .avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #5865F2;
+}
+
+/* DROPDOWN */
+.dropdown {
+  position: absolute;
+  top: 55px;
+  right: 0;
+
+  width: 180px;
+  background: rgba(10, 12, 20, 0.95);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+
+  backdrop-filter: blur(15px);
+
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.dropdown a {
+  padding: 12px;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+
+  transition: 0.2s;
+}
+
+.dropdown a:hover {
+  background: rgba(88,101,242,0.2);
+}
+
+/* show */
+.nav-user.active .dropdown {
+  display: flex;
+}
