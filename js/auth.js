@@ -34,17 +34,18 @@ function cleanUrl() {
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 
-/* ================= EVENT SYSTEM ================= */
+/* ================= EVENT ================= */
 
-function updateNavbarUI() {
+function triggerAuthUpdate() {
   window.dispatchEvent(new Event("auth:update"));
 }
 
-/* ================= DISCORD LOGIN LINK ================= */
+/* ================= INIT ================= */
 
 window.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("loginBtn");
 
+  /* LOGIN LINK */
   if (loginBtn) {
     const discordAuthURL =
       `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
@@ -55,8 +56,7 @@ window.addEventListener("DOMContentLoaded", () => {
     loginBtn.href = discordAuthURL;
   }
 
-  /* ================= LOGIN FLOW ================= */
-
+  /* LOGIN FLOW */
   const token = getTokenFromHash();
 
   if (token) {
@@ -77,17 +77,21 @@ window.addEventListener("DOMContentLoaded", () => {
           avatar: user.avatar,
         });
 
-        updateNavbarUI();
+        // 🔥 WAŻNE: natychmiast UI update
+        triggerAuthUpdate();
 
-        window.location.replace(BASE_URL);
+        // lekki delay żeby event zdążył odpalić
+        setTimeout(() => {
+          window.location.replace(BASE_URL);
+        }, 100);
       })
       .catch(() => {
         clearUser();
+        triggerAuthUpdate();
       });
   }
 
-  /* ================= AUTO REDIRECT ================= */
-
+  /* AUTO REDIRECT */
   const saved = getSavedUser();
 
   if (saved && window.location.pathname.includes("login.html")) {
