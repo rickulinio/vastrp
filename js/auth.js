@@ -57,11 +57,6 @@ handleLogin();
 
 const savedUser = localStorage.getItem("user");
 
-if (savedUser) {
-  const isLoginPage = window.location.pathname.includes("login.html");
-
-  // jeśli ktoś przypadkiem wpadł na login.html → cofka
-  if (isLoginPage) {
-    window.location.replace(BASE_URL);
-  }
+if (savedUser && window.location.pathname.includes("login.html")) {
+  window.location.replace(BASE_URL);
 }
