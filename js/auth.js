@@ -16,7 +16,7 @@ function getTokenFromHash() {
   return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
 
-/* CLEAN */
+/* CLEAN URL */
 function cleanUrl() {
   window.history.replaceState({}, document.title, window.location.pathname);
 }
@@ -26,7 +26,7 @@ function triggerAuthUpdate() {
   window.dispatchEvent(new Event("auth:update"));
 }
 
-/* LOGIN URL */
+/* DISCORD LOGIN */
 function getDiscordLoginURL() {
   return `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(BASE_URL)}&response_type=token&scope=identify`;
 }
@@ -38,48 +38,49 @@ async function fetchDiscordUser(token) {
   });
 
   if (!res.ok) throw new Error("Discord API error");
-  return await res.json();
+  return res.json();
 }
 
-/* LOGIN */
+/* LOGIN FLOW (FIXED) */
 async function handleLogin() {
   const token = getTokenFromHash();
-
-  console.log("TOKEN:", token);
 
   if (!token) return;
 
   try {
     const user = await fetchDiscordUser(token);
 
-    if (!user?.id) throw new Error("No user");
+    if (!user?.id) throw new Error("Invalid user");
 
     const userData = {
       id: user.id,
       username: user.username,
       avatar: user.avatar
         ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=512`
-        : "https://cdn.discordapp.com/embed/avatars/0.png"
+        : `https://cdn.discordapp.com/embed/avatars/0.png`
     };
 
     saveUser(userData);
 
-    console.log("SAVED:", userData);
-
     cleanUrl();
     triggerAuthUpdate();
 
-    window.location.replace(BASE_URL);
+    // mały delay żeby eventy zdążyły
+    setTimeout(() => {
+      window.location.href = BASE_URL;
+    }, 150);
 
   } catch (e) {
-    console.error(e);
+    console.error("LOGIN ERROR:", e);
     clearUser();
+    triggerAuthUpdate();
   }
 }
 
-window.addEventListener("DOMContentLoaded", async () => {
+/* INIT */
+window.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) loginBtn.href = getDiscordLoginURL();
 
-  await handleLogin();
+  handleLogin();
 });
