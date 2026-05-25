@@ -1,4 +1,6 @@
 const CLIENT_ID = "1480598374024483012";
+
+/* ================= BASE ================= */
 const BASE_URL = "https://rickulinio.github.io/vast/";
 
 /* ================= LOGIN LINK ================= */
@@ -6,23 +8,26 @@ const BASE_URL = "https://rickulinio.github.io/vast/";
 const loginBtn = document.getElementById("loginBtn");
 
 if (loginBtn) {
-  const REDIRECT_URI = `${BASE_URL}login.html`;
-
   loginBtn.href =
     `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+    `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
     `&response_type=token` +
     `&scope=identify`;
 }
 
-/* ================= GET TOKEN ================= */
+/* ================= TOKEN ================= */
 
 function getToken() {
   if (!window.location.hash) return null;
-  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+
+  return new URLSearchParams(
+    window.location.hash.substring(1)
+  ).get("access_token");
 }
 
-/* ================= CLEAN ================= */
+const token = getToken();
+
+/* ================= CLEAN URL ================= */
 
 function cleanUrl() {
   window.history.replaceState({}, document.title, window.location.pathname);
@@ -30,9 +35,9 @@ function cleanUrl() {
 
 /* ================= LOGIN FLOW ================= */
 
-const token = getToken();
-
 if (token) {
+  cleanUrl();
+
   fetch("https://discord.com/api/users/@me", {
     headers: {
       Authorization: `Bearer ${token}`
@@ -40,14 +45,9 @@ if (token) {
   })
     .then(r => r.json())
     .then(user => {
-      if (!user?.id) throw new Error("bad user");
-
       localStorage.setItem("user", JSON.stringify(user));
 
-      cleanUrl();
-
-      // 🔥 NAJWAŻNIEJSZE FIX:
-      // zawsze wraca na HOME, NIE login.html
+      // 🔥 ALWAYS GO HOME (NO login.html EVER)
       window.location.href = BASE_URL;
     })
     .catch(() => {
@@ -55,7 +55,7 @@ if (token) {
     });
 }
 
-/* ================= AUTO FIX ================= */
+/* ================= SAFETY GUARD ================= */
 
 const savedUser = localStorage.getItem("user");
 
