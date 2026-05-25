@@ -1751,24 +1751,47 @@ body {
   }
 }
 
-.nav-user,
-.nav-user-mobile {
+.nav-user-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.nav-user img,
-.nav-user-mobile img {
-  width: 32px;
-  height: 32px;
+/* profil */
+.nav-profile {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+/* avatar */
+.nav-profile img {
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 2px solid #5865F2;
 }
 
-.nav-user span,
-.nav-user-mobile span {
-  font-size: 14px;
-  font-weight: 600;
+/* tooltip nick */
+.nav-profile::after {
+  content: attr(data-name);
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
   color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  opacity: 0;
+  transition: 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.nav-profile:hover::after {
+  opacity: 1;
 }

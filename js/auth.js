@@ -2,11 +2,9 @@ const CLIENT_ID = "1480598374024483012";
 const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
 const loginBtn = document.getElementById("loginBtn");
-const userBox = document.getElementById("user");
+const profileBtn = document.getElementById("profileBtn");
 
-// ==============================
-// LOGIN LINK
-// ==============================
+// ================= LOGIN LINK =================
 if (loginBtn) {
   loginBtn.href =
     `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
@@ -15,53 +13,40 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
-// ==============================
-// RENDER USER
-// ==============================
+// ================= RENDER PROFILE =================
 function renderUser(user) {
   const avatarURL = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  if (userBox) {
-    userBox.innerHTML = `
-      <div class="profile">
-        <img class="avatar" src="${avatarURL}" />
-        <p>${user.username}</p>
-      </div>
+  if (loginBtn) loginBtn.style.display = "none";
+
+  if (profileBtn) {
+    profileBtn.style.display = "flex";
+    profileBtn.setAttribute("data-name", user.username);
+
+    profileBtn.innerHTML = `
+      <img src="${avatarURL}" alt="avatar">
     `;
   }
-
-  // 🔥 HIDE LOGIN BTN PO ZALOGOWANIU
-  if (loginBtn) {
-    loginBtn.style.display = "none";
-  }
 }
 
-// ==============================
-// GET TOKEN
-// ==============================
-function getTokenFromHash() {
+// ================= TOKEN =================
+function getToken() {
   if (!window.location.hash) return null;
-
-  const params = new URLSearchParams(window.location.hash.substring(1));
-  return params.get("access_token");
+  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
 
-const token = getTokenFromHash();
+const token = getToken();
 
-// ==============================
-// LOGIN FLOW
-// ==============================
+// ================= LOGIN FLOW =================
 if (token) {
   window.history.replaceState({}, document.title, window.location.pathname);
 
   fetch("https://discord.com/api/users/@me", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    headers: { Authorization: `Bearer ${token}` }
   })
-    .then(res => res.json())
+    .then(r => r.json())
     .then(user => {
       localStorage.setItem("user", JSON.stringify(user));
       renderUser(user);
@@ -69,39 +54,12 @@ if (token) {
       setTimeout(() => {
         window.location.replace("/vast/index.html");
       }, 500);
-    })
-    .catch(err => console.error("Discord login error:", err));
+    });
 }
 
-// ==============================
-// AUTO LOGIN
-// ==============================
+// ================= AUTO LOGIN =================
 const savedUser = localStorage.getItem("user");
 
 if (savedUser && !token) {
-  const user = JSON.parse(savedUser);
-  renderUser(user);
-}
-
-// ==============================
-// SAFE MOBILE FIX (NO CRASH)
-// ==============================
-const mobileBtn = document.getElementById("loginBtnMobile");
-if (mobileBtn && savedUser) {
-  mobileBtn.textContent = "Profil";
-  mobileBtn.href = "/vast/index.html";
-}
-
-const mobileUser = document.getElementById("userMobile");
-if (mobileUser && savedUser) {
-  const user = JSON.parse(savedUser);
-
-  const avatarURL = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  mobileUser.innerHTML = `
-    <img src="${avatarURL}" />
-    <span>${user.username}</span>
-  `;
+  renderUser(JSON.parse(savedUser));
 }
