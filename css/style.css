@@ -2098,3 +2098,54 @@ body {
     transform:translateY(0);
   }
 }
+
+.profile-wrap{
+  display:flex;
+  align-items:center;
+}
+
+.logout-btn{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  padding:10px 16px;
+
+  border:none;
+  border-radius:14px;
+
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(12px);
+
+  color:#fff;
+
+  font-weight:600;
+  font-size:14px;
+
+  cursor:pointer;
+
+  transition:.25s;
+}
+
+.logout-btn:hover{
+  transform:translateY(-2px);
+  background:rgba(255,255,255,.12);
+  box-shadow:0 0 20px rgba(255,255,255,.08);
+}
+
+.logout-avatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.logout-icon{
+  opacity:.7;
+  transition:.25s;
+}
+
+.logout-btn:hover .logout-icon{
+  transform:translateX(4px);
+  opacity:1;
+}

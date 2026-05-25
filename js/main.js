@@ -273,7 +273,6 @@ if (canvas && ctx) {
 
   if (!saved || !userBox) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
-    if (userBox) userBox.innerHTML = "";
     return;
   }
 
@@ -283,41 +282,28 @@ if (canvas && ctx) {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  // hide login
-  if (loginBtn) loginBtn.style.display = "none";
-
-  // IMPORTANT: NIE nadpisujemy całego nav layoutu
-  userBox.innerHTML = `
-    <div class="profile-wrap" id="profileBtn">
-      <img src="${avatar}" style="width:32px;height:32px;border-radius:50%;">
-      <span>${user.username}</span>
-    </div>
-
-<div class="profile-menu" id="profileMenu">
-  <a href="#" id="logoutBtn">
-    Wyloguj się
-  </a>
-</div>
-  `;
-
-  const btn = document.getElementById("profileBtn");
-  const menu = document.getElementById("profileMenu");
-
-  if (btn && menu) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.style.display =
-        menu.style.display === "block" ? "none" : "block";
-    });
-
-    document.addEventListener("click", () => {
-      menu.style.display = "none";
-    });
+  if (loginBtn) {
+    loginBtn.style.display = "none";
   }
 
-  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    localStorage.removeItem("user");
-    location.reload();
-  });
+  userBox.innerHTML = `
+    <div class="profile-wrap">
+
+      <button class="logout-btn" id="logoutBtn">
+        <img src="${avatar}" class="logout-avatar">
+        <span>${user.username}</span>
+        <span class="logout-icon">↩</span>
+      </button>
+
+    </div>
+  `;
+
+  document.getElementById("logoutBtn")
+    ?.addEventListener("click", () => {
+
+      localStorage.removeItem("user");
+
+      window.location.reload();
+    });
+
 })();
