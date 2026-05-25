@@ -1,36 +1,65 @@
+let progress = 0;
+
+const progressText = document.querySelector(".loader-progress-text");
+const loader = document.getElementById("loader");
+
+const interval = setInterval(() => {
+  progress += Math.floor(Math.random() * 8) + 2;
+
+  if (progress >= 100) {
+    progress = 100;
+    clearInterval(interval);
+
+    setTimeout(() => {
+      if (loader) {
+        loader.style.opacity = "0";
+        loader.style.pointerEvents = "none";
+      }
+    }, 500);
+  }
+
+  if (progressText) {
+    progressText.textContent = progress + "%";
+  }
+}, 80);
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    const l = document.getElementById("loader");
+    if (l) l.classList.add("hide");
+  }, 1800);
+});
+
+/* ─── SAFE HELPERS ─── */
 const $ = (id) => document.getElementById(id);
 
-/* ─── AUTH SYNC (LOGIN / PROFILE FIX) ─── */
+/* ─── AUTH SYNC (🔥 FIX LOGIN NA HOME) ─── */
 (function authSync() {
   const savedUser = localStorage.getItem("user");
+  if (!savedUser) return;
+
+  const user = JSON.parse(savedUser);
 
   const loginBtn = $("loginBtn");
   const userBox = $("user");
-
-  if (!savedUser) {
-    if (loginBtn) loginBtn.style.display = "inline-block";
-    if (userBox) userBox.style.display = "none";
-    return;
-  }
-
-  const user = JSON.parse(savedUser);
 
   const avatarURL = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  // hide login
   if (loginBtn) loginBtn.style.display = "none";
 
-  // show profile
-  if (userBox) {  
+  if (userBox) {
     userBox.style.display = "flex";
+
     userBox.innerHTML = `
-      <div class="profile" title="${user.username}">
+      <div class="profile">
         <img class="avatar" src="${avatarURL}" />
         <span>${user.username}</span>
       </div>
     `;
+
+    userBox.title = user.username;
   }
 })();
 
