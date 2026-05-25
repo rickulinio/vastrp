@@ -116,8 +116,7 @@ const obs = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.08 });
 
-document.querySelectorAll(".reveal")
-  .forEach(el => obs.observe(el));
+document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
 
 /* ─── RULE HIGHLIGHT ─── */
 const ruleItems = document.querySelectorAll(".rule-item");
@@ -177,9 +176,7 @@ if (navToggle) {
   });
 }
 
-if (mobileOverlay) {
-  mobileOverlay.addEventListener("click", closeMenu);
-}
+if (mobileOverlay) mobileOverlay.addEventListener("click", closeMenu);
 
 document.querySelectorAll(".mobile-menu a").forEach(a => {
   a.addEventListener("click", closeMenu);
@@ -265,59 +262,37 @@ if (canvas && ctx) {
   animateParticles();
 }
 
-(function authSync() {
-  const saved = localStorage.getItem("user");
+/* ─── SIMPLE AUTH (NO LAYOUT, ONLY LOGOUT BUTTON) ─── */
 
-  const loginBtn = document.getElementById("loginBtn");
-  const userBox = document.getElementById("user");
+const savedUser = localStorage.getItem("user");
+const loginBtn = document.getElementById("loginBtn");
+const userBox = document.getElementById("user");
 
-  if (!saved || !userBox) {
-    if (loginBtn) loginBtn.style.display = "inline-flex";
-    if (userBox) userBox.innerHTML = "";
-    return;
-  }
+if (!savedUser) {
+  if (loginBtn) loginBtn.style.display = "inline-flex";
+  if (userBox) userBox.innerHTML = "";
+} else {
+  const user = JSON.parse(savedUser);
 
-  const user = JSON.parse(saved);
+  if (loginBtn) loginBtn.style.display = "none";
 
   const avatar = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  // hide login
-  if (loginBtn) loginBtn.style.display = "none";
+  // MINIMAL UI (reszta CSS robi robotę)
+  if (userBox) {
+    userBox.innerHTML = `
+      <div class="user-pill">
+        <img src="${avatar}" class="user-avatar">
+        <span class="user-name">${user.username}</span>
+        <button id="logoutBtn" class="logout-btn">Wyloguj</button>
+      </div>
+    `;
 
-  // IMPORTANT: NIE nadpisujemy całego nav layoutu
-  userBox.innerHTML = `
-    <div class="profile-wrap" id="profileBtn">
-      <img src="${avatar}" style="width:32px;height:32px;border-radius:50%;">
-      <span>${user.username}</span>
-    </div>
-
-<div class="profile-menu" id="profileMenu">
-  <a href="#" id="logoutBtn">
-    Wyloguj się
-  </a>
-</div>
-  `;
-
-  const btn = document.getElementById("profileBtn");
-  const menu = document.getElementById("profileMenu");
-
-  if (btn && menu) {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.style.display =
-        menu.style.display === "block" ? "none" : "block";
-    });
-
-    document.addEventListener("click", () => {
-      menu.style.display = "none";
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
+      localStorage.removeItem("user");
+      location.reload();
     });
   }
-
-  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    localStorage.removeItem("user");
-    location.reload();
-  });
-})();
+}
