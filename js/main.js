@@ -1,10 +1,10 @@
-const $ = (id) => document.getElementById(id);
+const byId = (id) => document.getElementById(id);
 
-/* ================= USER UI (ONLY DISPLAY) ================= */
+/* ================= USER UI ================= */
 
 function renderUserUI() {
-  const userBox = $("user");
-  const loginBtn = $("loginBtn");
+  const userBox = byId("user");
+  const loginBtn = byId("loginBtn");
 
   const user = window.AUTH?.getUser?.();
 
@@ -33,21 +33,19 @@ function renderUserUI() {
     </div>
   `;
 
-  const trigger = $("userTrigger");
-  const menu = $("userMenu");
+  const trigger = byId("userTrigger");
+  const menu = byId("userMenu");
 
-  if (trigger && menu) {
-    trigger.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.toggle("active");
-    });
+  trigger?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.classList.toggle("active");
+  });
 
-    document.addEventListener("click", () => {
-      menu.classList.remove("active");
-    });
-  }
+  document.addEventListener("click", () => {
+    menu?.classList.remove("active");
+  });
 
-  $("logoutBtn")?.addEventListener("click", () => {
+  byId("logoutBtn")?.addEventListener("click", () => {
     window.AUTH?.logout?.();
   });
 }
