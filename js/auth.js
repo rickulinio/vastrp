@@ -1,8 +1,7 @@
 const CLIENT_ID = "1480598374024483012";
 const REDIRECT_URI = "https://rickulinio.github.io/vast/login.html";
 
-/* ================= LOGIN LINK ================= */
-
+/* LOGIN LINK */
 const loginBtn = document.getElementById("loginBtn");
 
 if (loginBtn) {
@@ -13,60 +12,44 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
-/* ================= STORAGE ================= */
-
-function saveUser(user) {
-  localStorage.setItem("user", JSON.stringify(user));
-}
-
-function getUser() {
-  try {
-    return JSON.parse(localStorage.getItem("user"));
-  } catch {
-    return null;
-  }
-}
-
-function logout() {
-  localStorage.removeItem("user");
-  location.reload();
-}
-
-/* ================= TOKEN ================= */
-
+/* TOKEN */
 function getToken() {
   if (!window.location.hash) return null;
-
-  return new URLSearchParams(
-    window.location.hash.substring(1)
-  ).get("access_token");
+  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
 
 const token = getToken();
 
-/* ================= LOGIN FLOW ================= */
-
+/* LOGIN FLOW */
 if (token) {
   window.history.replaceState({}, document.title, window.location.pathname);
 
   fetch("https://discord.com/api/users/@me", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    headers: { Authorization: `Bearer ${token}` }
   })
     .then(r => r.json())
     .then(user => {
-      saveUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
 
+      // 🔥 WAŻNE: DELAY zamiast instant redirect
       setTimeout(() => {
         window.location.href = "https://rickulinio.github.io/vast/";
-      }, 300);
+      }, 200);
+    })
+    .catch(() => {
+      window.location.href = "https://rickulinio.github.io/vast/";
     });
 }
 
-/* ================= EXPORT SIMPLE STATE ================= */
+/* AUTO LOGIN CHECK */
+const savedUser = localStorage.getItem("user");
 
-window.AUTH = {
-  getUser,
-  logout
+if (savedUser && !token) {
+  console.log("logged:", JSON.parse(savedUser));
+}
+
+/* GLOBAL LOGOUT */
+window.logout = function () {
+  localStorage.removeItem("user");
+  window.location.href = "https://rickulinio.github.io/vast/";
 };
