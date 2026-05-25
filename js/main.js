@@ -3,41 +3,47 @@ const $ = (id) => document.getElementById(id);
 
 /* ─── AUTH SYNC (LOGIN / PROFILE FIX) ─── */
 (function authSync() {
-  const savedUser = localStorage.getItem("user");
+  try {
+    const savedUser = localStorage.getItem("user");
 
-  const loginBtn = document.getElementById("loginBtn");
-  const userBox = document.getElementById("user");
+    const loginBtn = document.getElementById("loginBtn");
+    const userBox = document.getElementById("user");
 
-  // brak usera
-  if (!savedUser) {
-    if (loginBtn) loginBtn.style.display = "inline-flex";
-    if (userBox) userBox.innerHTML = "";
-    return;
-  }
+    if (!savedUser || savedUser === "undefined") {
+      if (loginBtn) loginBtn.style.display = "inline-flex";
+      if (userBox) userBox.innerHTML = "";
+      return;
+    }
 
-  const user = JSON.parse(savedUser);
+    let user;
+    try {
+      user = JSON.parse(savedUser);
+    } catch (e) {
+      console.warn("Invalid user in localStorage");
+      localStorage.removeItem("user");
+      return;
+    }
 
-  const avatarURL = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+    const avatarURL = user.avatar
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+      : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  // 🔥 HARD HIDE LOGIN
-  if (loginBtn) {
-    loginBtn.style.setProperty("display", "none", "important");
-  }
+    if (loginBtn) {
+      loginBtn.style.setProperty("display", "none", "important");
+    }
 
-  // 🔥 SHOW PROFILE
-  if (userBox) {
-    userBox.style.setProperty("display", "flex", "important");
+    if (!userBox) return;
+
+    userBox.style.display = "flex";
 
     userBox.innerHTML = `
       <div class="profile-dropdown">
-        <div class="profile-trigger">
-          <img src="${avatarURL}" class="avatar-small">
-          <span>${user.username}</span>
+        <div class="profile-trigger" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <img src="${avatarURL}" class="avatar-small" style="width:32px;height:32px;border-radius:50%;">
+          <span>${user.username ?? "User"}</span>
         </div>
 
-        <div class="dropdown-menu">
+        <div class="dropdown-menu" style="display:none; position:absolute;">
           <a href="settings.html">⚙ Settings</a>
           <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
           <a href="#" id="logoutBtn">🚪 Logout</a>
@@ -48,15 +54,23 @@ const $ = (id) => document.getElementById(id);
     const trigger = userBox.querySelector(".profile-trigger");
     const dropdown = userBox.querySelector(".dropdown-menu");
 
-    trigger?.addEventListener("click", () => {
-      dropdown.classList.toggle("active");
-    });
+    if (trigger && dropdown) {
+      trigger.addEventListener("click", () => {
+        dropdown.style.display =
+          dropdown.style.display === "block" ? "none" : "block";
+      });
+    }
 
-    userBox.querySelector("#logoutBtn")?.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("user");
-      location.reload();
-    });
+    const logoutBtn = userBox.querySelector("#logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        location.reload();
+      });
+    }
+  } catch (err) {
+    console.error("authSync crashed:", err);
   }
 })();
 
