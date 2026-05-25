@@ -1,20 +1,6 @@
 const CLIENT_ID = "1480598374024483012";
 const BASE_URL = "https://rickulinio.github.io/vast/";
 
-/* ================= LOGIN BUTTON ================= */
-
-const loginBtn = document.getElementById("loginBtn");
-
-if (loginBtn) {
-  const discordAuthURL =
-    `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
-    `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
-    `&response_type=token` +
-    `&scope=identify`;
-
-  loginBtn.setAttribute("href", discordAuthURL);
-}
-
 /* ================= STORAGE ================= */
 
 function saveUser(user) {
@@ -42,11 +28,24 @@ function cleanUrl() {
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 
-/* ================= UI SYNC EVENT (IMPORTANT) ================= */
+/* ================= EVENT ================= */
 
 function updateNavbarUI() {
-  const event = new Event("auth:update");
-  window.dispatchEvent(event);
+  window.dispatchEvent(new Event("auth:update"));
+}
+
+/* ================= DISCORD LOGIN LINK ================= */
+
+const loginBtn = document.getElementById("loginBtn");
+
+if (loginBtn) {
+  const discordAuthURL =
+    `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
+    `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
+    `&response_type=token` +
+    `&scope=identify`;
+
+  loginBtn.href = discordAuthURL;
 }
 
 /* ================= LOGIN FLOW ================= */
@@ -61,8 +60,8 @@ if (token) {
       Authorization: `Bearer ${token}`,
     },
   })
-    .then((r) => r.json())
-    .then((user) => {
+    .then(r => r.json())
+    .then(user => {
       if (!user?.id) throw new Error("Invalid user");
 
       saveUser({
@@ -73,7 +72,6 @@ if (token) {
 
       updateNavbarUI();
 
-      // redirect po zapisaniu usera
       window.location.replace(BASE_URL);
     })
     .catch(() => {
