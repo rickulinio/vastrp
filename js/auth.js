@@ -101,7 +101,7 @@ if (token) {
       renderUser(user);
 
       setTimeout(() => {
-        window.location.replace("/vast/index.html");
+window.location.replace("/vast/");
       }, 500);
     });
 }
