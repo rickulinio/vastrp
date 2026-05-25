@@ -1,3 +1,8 @@
+/* ================= SAFE HELPER ================= */
+const get = (id) => document.getElementById(id);
+
+/* ================= LOADER ================= */
+
 let progress = 0;
 
 const progressText = document.querySelector(".loader-progress-text");
@@ -30,14 +35,12 @@ window.addEventListener("load", () => {
   }, 1800);
 });
 
-/* ─── SAFE HELPERS ─── */
-const $ = (id) => document.getElementById(id);
+/* ================= FACTIONS ================= */
 
-/* ─── RENDER FACTIONS ─── */
-const fg = $("factions-grid");
+const fg = get("factions-grid");
 
-if (fg && Array.isArray(FACTIONS)) {
-  FACTIONS.forEach(f => {
+if (fg && Array.isArray(window.FACTIONS)) {
+  window.FACTIONS.forEach(f => {
     const el = document.createElement("div");
     el.className = "faction-card reveal";
     el.style.setProperty("--fc", f.color);
@@ -45,19 +48,13 @@ if (fg && Array.isArray(FACTIONS)) {
     el.innerHTML = `
       <div class="fc-top">
         <div class="fc-icon">${f.icon}</div>
-        <div>
-          <div class="fc-name">${f.name}</div>
-        </div>
+        <div class="fc-name">${f.name}</div>
       </div>
 
       <p class="fc-desc">${f.desc}</p>
 
-      <button
-        class="fc-cta"
-        style="--fc:${f.color};background:${f.color}18;border-color:${f.color}30;"
-        onclick="openModal('${f.key}')"
-      >
-        Złóż Podanie <span>→</span>
+      <button class="fc-cta" onclick="openModal('${f.key}')">
+        Złóż Podanie →
       </button>
     `;
 
@@ -65,11 +62,12 @@ if (fg && Array.isArray(FACTIONS)) {
   });
 }
 
-/* ─── RENDER TEAM ─── */
-const tg = $("team-grid");
+/* ================= TEAM ================= */
 
-if (tg && Array.isArray(TEAM)) {
-  TEAM.forEach(m => {
+const tg = get("team-grid");
+
+if (tg && Array.isArray(window.TEAM)) {
+  window.TEAM.forEach(m => {
     tg.innerHTML += `
       <div class="team-card reveal">
         <img class="team-av" src="${m.image}" alt="${m.name}">
@@ -80,15 +78,17 @@ if (tg && Array.isArray(TEAM)) {
   });
 }
 
-/* ─── NAV SCROLL ─── */
+/* ================= NAV SCROLL ================= */
+
 window.addEventListener("scroll", () => {
-  const nav = $("nav");
+  const nav = get("nav");
   if (!nav) return;
 
   nav.classList.toggle("scrolled", scrollY > 20);
 });
 
-/* ─── COUNTERS ─── */
+/* ================= COUNTERS ================= */
+
 function countUp(el, to, dur) {
   if (!el) return;
 
@@ -103,11 +103,12 @@ function countUp(el, to, dur) {
 }
 
 setTimeout(() => {
-  countUp($("s-players"), 47, 1200);
-  countUp($("s-discord"), 1284, 1800);
+  countUp(get("s-players"), 47, 1200);
+  countUp(get("s-discord"), 1284, 1800);
 }, 300);
 
-/* ─── REVEAL ─── */
+/* ================= REVEAL ================= */
+
 const obs = new IntersectionObserver((entries) => {
   entries.forEach((e, i) => {
     if (e.isIntersecting) {
@@ -116,10 +117,10 @@ const obs = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.08 });
 
-document.querySelectorAll(".reveal")
-  .forEach(el => obs.observe(el));
+document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
 
-/* ─── RULE HIGHLIGHT ─── */
+/* ================= RULE HIGHLIGHT ================= */
+
 const ruleItems = document.querySelectorAll(".rule-item");
 
 if (ruleItems.length) {
@@ -138,7 +139,8 @@ if (ruleItems.length) {
   ruleItems.forEach(item => ruleObserver.observe(item));
 }
 
-/* ─── KEY EFFECT ─── */
+/* ================= KEY EFFECT ================= */
+
 document.querySelectorAll(".key").forEach(key => {
   key.addEventListener("click", () => {
     key.classList.toggle("show");
@@ -149,10 +151,11 @@ document.querySelectorAll(".key").forEach(key => {
   });
 });
 
-/* ─── MOBILE MENU ─── */
-const navToggle = $("navToggle");
-const mobileMenu = $("mobileMenu");
-const mobileOverlay = $("mobileOverlay");
+/* ================= MOBILE MENU ================= */
+
+const navToggle = get("navToggle");
+const mobileMenu = get("mobileMenu");
+const mobileOverlay = get("mobileOverlay");
 
 function openMenu() {
   if (!mobileMenu || !mobileOverlay || !navToggle) return;
@@ -185,7 +188,8 @@ document.querySelectorAll(".mobile-menu a").forEach(a => {
   a.addEventListener("click", closeMenu);
 });
 
-/* ─── CURSOR GLOW ─── */
+/* ================= CURSOR ================= */
+
 const glow = document.querySelector(".cursor-glow");
 
 if (glow) {
@@ -194,13 +198,14 @@ if (glow) {
       left: `${e.clientX}px`,
       top: `${e.clientY}px`
     }, {
-      duration: 350,
+      duration: 300,
       fill: "forwards"
     });
   });
 }
 
-/* ─── MAGNETIC BUTTONS ─── */
+/* ================= MAGNETIC BUTTONS ================= */
+
 document.querySelectorAll(".btn-lg").forEach(btn => {
   btn.addEventListener("mousemove", e => {
     const rect = btn.getBoundingClientRect();
@@ -217,7 +222,8 @@ document.querySelectorAll(".btn-lg").forEach(btn => {
   });
 });
 
-/* ─── PARTICLES ─── */
+/* ================= PARTICLES ================= */
+
 const canvas = document.getElementById("particles");
 const ctx = canvas?.getContext("2d");
 
@@ -265,11 +271,13 @@ if (canvas && ctx) {
   animateParticles();
 }
 
-(function authSync() {
+/* ================= AUTH UI SYNC (ONLY DISPLAY) ================= */
+
+function renderAuthUI() {
   const saved = localStorage.getItem("user");
 
-  const loginBtn = document.getElementById("loginBtn");
-  const userBox = document.getElementById("user");
+  const loginBtn = get("loginBtn");
+  const userBox = get("user");
 
   if (!saved || !userBox) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
@@ -283,41 +291,39 @@ if (canvas && ctx) {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-  // hide login
   if (loginBtn) loginBtn.style.display = "none";
 
-  // IMPORTANT: NIE nadpisujemy całego nav layoutu
   userBox.innerHTML = `
-    <div class="profile-wrap" id="profileBtn">
-      <img src="${avatar}" style="width:32px;height:32px;border-radius:50%;">
-      <span>${user.username}</span>
-    </div>
+    <div class="user-dropdown">
+      <div class="user-trigger" id="userTrigger">
+        <img src="${avatar}" class="user-avatar">
+        <span class="user-name">${user.username}</span>
+      </div>
 
-<div class="profile-menu" id="profileMenu">
-  <a href="#" id="logoutBtn">
-    Wyloguj się
-  </a>
-</div>
+      <div class="user-menu" id="userMenu">
+        <button class="logout-btn" id="logoutBtn">Wyloguj się</button>
+      </div>
+    </div>
   `;
 
-  const btn = document.getElementById("profileBtn");
-  const menu = document.getElementById("profileMenu");
+  const trigger = get("userTrigger");
+  const menu = get("userMenu");
 
-  if (btn && menu) {
-    btn.addEventListener("click", (e) => {
+  if (trigger && menu) {
+    trigger.addEventListener("click", (e) => {
       e.stopPropagation();
-      menu.style.display =
-        menu.style.display === "block" ? "none" : "block";
+      menu.classList.toggle("active");
     });
 
     document.addEventListener("click", () => {
-      menu.style.display = "none";
+      menu.classList.remove("active");
     });
   }
 
-  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
-    e.preventDefault();
+  get("logoutBtn")?.addEventListener("click", () => {
     localStorage.removeItem("user");
     location.reload();
   });
-})();
+}
+
+renderAuthUI();
