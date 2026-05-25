@@ -1,8 +1,8 @@
 /* ─── SAFE HELPERS ─── */
-const $ = (id) => document.getElementById(id);
+const getById = (id) => document.getElementById(id);
 
 /* ─── RENDER FACTIONS ─── */
-const fg = $("factions-grid");
+const fg = getById("factions-grid");
 
 if (fg && Array.isArray(FACTIONS)) {
   FACTIONS.forEach(f => {
@@ -35,7 +35,7 @@ if (fg && Array.isArray(FACTIONS)) {
 }
 
 /* ─── RENDER TEAM ─── */
-const tg = $("team-grid");
+const tg = getById("team-grid");
 
 if (tg && Array.isArray(TEAM)) {
   TEAM.forEach(m => {
@@ -50,7 +50,7 @@ if (tg && Array.isArray(TEAM)) {
 }
 
 /* ─── RENDER FAQ ─── */
-const fl = $("faq-list");
+const fl = getById("faq-list");
 
 if (fl && Array.isArray(FAQS)) {
   FAQS.forEach(item => {
@@ -88,7 +88,7 @@ function toggleFaq(btn) {
 
 /* ─── NAV SCROLL ─── */
 window.addEventListener('scroll', () => {
-  const nav = $("nav");
+  const nav = getById("nav");
   if (!nav) return;
 
   nav.classList.toggle('scrolled', scrollY > 20);
@@ -109,8 +109,8 @@ function countUp(el, to, dur) {
 }
 
 setTimeout(() => {
-  countUp($("s-players"), 47, 1200);
-  countUp($("s-discord"), 1284, 1800);
+  countUp(getById("s-players"), 47, 1200);
+  countUp(getById("s-discord"), 1284, 1800);
 }, 300);
 
 /* ─── REVEAL ─── */
@@ -157,9 +157,9 @@ document.querySelectorAll('.key').forEach(key => {
 });
 
 /* ─── MOBILE MENU ─── */
-const navToggle = $("navToggle");
-const mobileMenu = $("mobileMenu");
-const mobileOverlay = $("mobileOverlay");
+const navToggle = getById("navToggle");
+const mobileMenu = getById("mobileMenu");
+const mobileOverlay = getById("mobileOverlay");
 
 function openMenu() {
   if (!mobileMenu || !mobileOverlay || !navToggle) return;
