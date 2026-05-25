@@ -1,4 +1,3 @@
-/* ─── SAFE HELPERS ─── */
 const $ = (id) => document.getElementById(id);
 
 /* ─── AUTH SYNC (LOGIN / PROFILE FIX) ─── */
@@ -24,7 +23,7 @@ const $ = (id) => document.getElementById(id);
   if (loginBtn) loginBtn.style.display = "none";
 
   // show profile
-  if (userBox) {
+  if (userBox) {  
     userBox.style.display = "flex";
     userBox.innerHTML = `
       <div class="profile" title="${user.username}">
