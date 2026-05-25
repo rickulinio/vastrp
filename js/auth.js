@@ -6,14 +6,16 @@ const BASE_URL = "https://rickulinio.github.io/vast/";
 const loginBtn = document.getElementById("loginBtn");
 
 if (loginBtn) {
-  loginBtn.href =
+  const discordAuthURL =
     `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(BASE_URL)}` +
     `&response_type=token` +
     `&scope=identify`;
+
+  loginBtn.setAttribute("href", discordAuthURL);
 }
 
-/* ================= HELPERS ================= */
+/* ================= STORAGE ================= */
 
 function saveUser(user) {
   localStorage.setItem("user", JSON.stringify(user));
@@ -29,7 +31,7 @@ function getSavedUser() {
 
 /* ================= TOKEN ================= */
 
-function getToken() {
+function getTokenFromHash() {
   if (!window.location.hash) return null;
   return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
@@ -40,25 +42,38 @@ function cleanUrl() {
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 
-const token = getToken();
+/* ================= UI SYNC EVENT (IMPORTANT) ================= */
+
+function updateNavbarUI() {
+  const event = new Event("auth:update");
+  window.dispatchEvent(event);
+}
 
 /* ================= LOGIN FLOW ================= */
+
+const token = getTokenFromHash();
 
 if (token) {
   cleanUrl();
 
   fetch("https://discord.com/api/users/@me", {
     headers: {
-      Authorization: `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   })
-    .then(r => r.json())
-    .then(user => {
-      if (!user?.id) throw new Error("invalid user");
+    .then((r) => r.json())
+    .then((user) => {
+      if (!user?.id) throw new Error("Invalid user");
 
-      saveUser(user);
+      saveUser({
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar,
+      });
 
-      // 🔥 NAJSTABILNIEJSZY REDIRECT (ZERO LOOPÓW)
+      updateNavbarUI();
+
+      // redirect po zapisaniu usera
       window.location.replace(BASE_URL);
     })
     .catch(() => {
@@ -66,13 +81,10 @@ if (token) {
     });
 }
 
-/* ================= AUTO FIX ================= */
+/* ================= AUTO REDIRECT ================= */
 
 const saved = getSavedUser();
 
-if (saved) {
-  // jeśli ktoś jest zalogowany i siedzi na login.html → wywal go na home
-  if (window.location.pathname.includes("login.html")) {
-    window.location.replace(BASE_URL);
-  }
+if (saved && window.location.pathname.includes("login.html")) {
+  window.location.replace(BASE_URL);
 }
