@@ -24,7 +24,10 @@ function clearUser() {
 function getTokenFromHash() {
   if (!window.location.hash) return null;
 
-  const params = new URLSearchParams(window.location.hash.substring(1));
+  const params = new URLSearchParams(
+    window.location.hash.substring(1)
+  );
+
   return params.get("access_token");
 }
 
@@ -41,7 +44,9 @@ function cleanUrl() {
 /* ================= EVENT ================= */
 
 function triggerAuthUpdate() {
-  window.dispatchEvent(new Event("auth:update"));
+  window.dispatchEvent(
+    new Event("auth:update")
+  );
 }
 
 /* ================= LOGIN URL ================= */
@@ -59,6 +64,7 @@ function getDiscordLoginURL() {
 /* ================= FETCH USER ================= */
 
 async function fetchDiscordUser(token) {
+
   const response = await fetch(
     "https://discord.com/api/users/@me",
     {
@@ -69,7 +75,9 @@ async function fetchDiscordUser(token) {
   );
 
   if (!response.ok) {
-    throw new Error(`Discord API Error: ${response.status}`);
+    throw new Error(
+      `Discord API Error: ${response.status}`
+    );
   }
 
   return await response.json();
@@ -78,6 +86,7 @@ async function fetchDiscordUser(token) {
 /* ================= LOGIN FLOW ================= */
 
 async function handleLogin() {
+
   const token = getTokenFromHash();
 
   if (!token) return;
@@ -85,6 +94,7 @@ async function handleLogin() {
   console.log("TOKEN:", token);
 
   try {
+
     const user = await fetchDiscordUser(token);
 
     console.log("USER:", user);
@@ -93,23 +103,45 @@ async function handleLogin() {
       throw new Error("Invalid user");
     }
 
-    saveUser({
+    /* FULL AVATAR URL */
+
+    const avatarURL = user.avatar
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=512`
+      : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator) % 5}.png`;
+
+    /* SAVE USER */
+
+    const userData = {
       id: user.id,
       username: user.username,
-      avatar: user.avatar,
-    });
+      avatar: avatarURL,
+    };
 
-    // URL czyścimy DOPIERO po zapisaniu
+    saveUser(userData);
+
+    console.log(
+      "SAVED USER:",
+      getSavedUser()
+    );
+
+    /* CLEAN URL */
+
     cleanUrl();
 
-    // update UI
+    /* UPDATE UI */
+
     triggerAuthUpdate();
 
-    // redirect
+    /* REDIRECT */
+
     window.location.replace(BASE_URL);
 
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
+
+    console.error(
+      "LOGIN ERROR:",
+      err
+    );
 
     clearUser();
 
@@ -119,28 +151,35 @@ async function handleLogin() {
 
 /* ================= INIT ================= */
 
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener(
+  "DOMContentLoaded",
+  async () => {
 
-  /* LOGIN BUTTON */
+    /* LOGIN BUTTON */
 
-  const loginBtn = document.getElementById("loginBtn");
+    const loginBtn =
+      document.getElementById("loginBtn");
 
-  if (loginBtn) {
-    loginBtn.href = getDiscordLoginURL();
+    if (loginBtn) {
+      loginBtn.href =
+        getDiscordLoginURL();
+    }
+
+    /* HANDLE LOGIN */
+
+    await handleLogin();
+
+    /* AUTO REDIRECT */
+
+    const saved = getSavedUser();
+
+    if (
+      saved &&
+      window.location.pathname.includes(
+        "login.html"
+      )
+    ) {
+      window.location.replace(BASE_URL);
+    }
   }
-
-  /* HANDLE LOGIN */
-
-  await handleLogin();
-
-  /* AUTO REDIRECT */
-
-  const saved = getSavedUser();
-
-  if (
-    saved &&
-    window.location.pathname.includes("login.html")
-  ) {
-    window.location.replace(BASE_URL);
-  }
-});
+);
