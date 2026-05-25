@@ -44,9 +44,7 @@ function cleanUrl() {
 /* ================= EVENT ================= */
 
 function triggerAuthUpdate() {
-  window.dispatchEvent(
-    new Event("auth:update")
-  );
+  window.dispatchEvent(new Event("auth:update"));
 }
 
 /* ================= LOGIN URL ================= */
@@ -64,7 +62,6 @@ function getDiscordLoginURL() {
 /* ================= FETCH USER ================= */
 
 async function fetchDiscordUser(token) {
-
   const response = await fetch(
     "https://discord.com/api/users/@me",
     {
@@ -75,9 +72,7 @@ async function fetchDiscordUser(token) {
   );
 
   if (!response.ok) {
-    throw new Error(
-      `Discord API Error: ${response.status}`
-    );
+    throw new Error(`Discord API Error: ${response.status}`);
   }
 
   return await response.json();
@@ -89,9 +84,9 @@ async function handleLogin() {
 
   const token = getTokenFromHash();
 
-  if (!token) return;
-
   console.log("TOKEN:", token);
+
+  if (!token) return;
 
   try {
 
@@ -103,13 +98,9 @@ async function handleLogin() {
       throw new Error("Invalid user");
     }
 
-    /* FULL AVATAR URL */
-
     const avatarURL = user.avatar
       ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=512`
-      : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator) % 5}.png`;
-
-    /* SAVE USER */
+      : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
     const userData = {
       id: user.id,
@@ -117,31 +108,23 @@ async function handleLogin() {
       avatar: avatarURL,
     };
 
+    console.log("SAVING USER:", userData);
+
     saveUser(userData);
 
     console.log(
-      "SAVED USER:",
-      getSavedUser()
+      "LOCAL STORAGE AFTER SAVE:",
+      localStorage.getItem("user")
     );
-
-    /* CLEAN URL */
 
     cleanUrl();
 
-    /* UPDATE UI */
-
     triggerAuthUpdate();
-
-    /* REDIRECT */
 
     window.location.replace(BASE_URL);
 
   } catch (err) {
-
-    console.error(
-      "LOGIN ERROR:",
-      err
-    );
+    console.error("LOGIN ERROR:", err);
 
     clearUser();
 
@@ -151,35 +134,22 @@ async function handleLogin() {
 
 /* ================= INIT ================= */
 
-window.addEventListener(
-  "DOMContentLoaded",
-  async () => {
+window.addEventListener("DOMContentLoaded", async () => {
 
-    /* LOGIN BUTTON */
+  const loginBtn = document.getElementById("loginBtn");
 
-    const loginBtn =
-      document.getElementById("loginBtn");
-
-    if (loginBtn) {
-      loginBtn.href =
-        getDiscordLoginURL();
-    }
-
-    /* HANDLE LOGIN */
-
-    await handleLogin();
-
-    /* AUTO REDIRECT */
-
-    const saved = getSavedUser();
-
-    if (
-      saved &&
-      window.location.pathname.includes(
-        "login.html"
-      )
-    ) {
-      window.location.replace(BASE_URL);
-    }
+  if (loginBtn) {
+    loginBtn.href = getDiscordLoginURL();
   }
-);
+
+  await handleLogin();
+
+  const saved = getSavedUser();
+
+  if (
+    saved &&
+    window.location.pathname.includes("login.html")
+  ) {
+    window.location.replace(BASE_URL);
+  }
+});
