@@ -27,68 +27,16 @@ function getSavedUser() {
   }
 }
 
-/* ================= RENDER USER (ONLY UI, NO LOGIC IN MAIN) ================= */
-
-function renderUser(user) {
-  const userBox = document.getElementById("user");
-  const loginBtn = document.getElementById("loginBtn");
-
-  if (!userBox) return;
-
-  const avatar = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  if (loginBtn) loginBtn.style.display = "none";
-
-  userBox.innerHTML = `
-    <div class="user-dropdown">
-      <div class="user-trigger" id="userTrigger">
-        <img src="${avatar}" class="user-avatar">
-        <span class="user-name">${user.username}</span>
-      </div>
-
-      <div class="user-menu" id="userMenu">
-        <button class="logout-btn" id="logoutBtn">🚪 Wyloguj się</button>
-      </div>
-    </div>
-  `;
-
-  const trigger = document.getElementById("userTrigger");
-  const menu = document.getElementById("userMenu");
-
-  if (trigger && menu) {
-    trigger.addEventListener("click", (e) => {
-      e.stopPropagation();
-
-      document.querySelectorAll(".user-menu.active")
-        .forEach(m => m.classList.remove("active"));
-
-      menu.classList.toggle("active");
-    });
-
-    document.addEventListener("click", () => {
-      menu.classList.remove("active");
-    });
-  }
-
-  document.getElementById("logoutBtn")?.addEventListener("click", () => {
-    localStorage.removeItem("user");
-    location.reload();
-  });
-}
-
-/* ================= TOKEN LOGIN ================= */
+/* ================= GET TOKEN ================= */
 
 function getToken() {
   if (!window.location.hash) return null;
-
-  return new URLSearchParams(
-    window.location.hash.substring(1)
-  ).get("access_token");
+  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
 
 const token = getToken();
+
+/* ================= LOGIN FLOW ================= */
 
 if (token) {
   window.history.replaceState({}, document.title, window.location.pathname);
@@ -100,19 +48,26 @@ if (token) {
   })
     .then(r => r.json())
     .then(user => {
+      if (!user?.id) throw new Error("bad user");
+
       saveUser(user);
-      renderUser(user);
+
+      // ❗ NIE renderuj tutaj UI (MAIN to robi)
+      // ❗ tylko zapis + redirect
 
       setTimeout(() => {
-        window.location.href = "https://rickulinio.github.io/vast/";
-      }, 400);
+        window.location.replace("https://rickulinio.github.io/vast/");
+      }, 200);
+    })
+    .catch(() => {
+      localStorage.removeItem("user");
     });
 }
 
-/* ================= AUTO LOGIN ================= */
+/* ================= AUTO GUARD ================= */
 
 const saved = getSavedUser();
 
-if (saved && !token) {
-  renderUser(saved);
+if (saved && window.location.pathname.includes("login.html")) {
+  window.location.replace("https://rickulinio.github.io/vast/");
 }
