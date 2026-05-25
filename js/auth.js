@@ -13,6 +13,58 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
+/* ================= RENDER USER ================= */
+
+function renderUser(user) {
+  const userBox = document.getElementById("user");
+  const loginBtn = document.getElementById("loginBtn");
+
+  if (!userBox) return;
+
+  const avatarURL = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  // chowamy login
+  if (loginBtn) {
+    loginBtn.style.display = "none";
+  }
+
+  // pokazujemy usera
+  userBox.style.display = "flex";
+
+  const profileBtn = document.getElementById("profileBtn");
+  const profileMenu = document.getElementById("profileMenu");
+
+  /* ===== OPEN / CLOSE ===== */
+
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    profileMenu.classList.toggle("active");
+  });
+
+  /* ===== CLOSE WHEN CLICK OUTSIDE ===== */
+
+  document.addEventListener("click", (e) => {
+    if (!userBox.contains(e.target)) {
+      profileMenu.classList.remove("active");
+    }
+  });
+
+  /* ===== LOGOUT ===== */
+
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  logoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    localStorage.removeItem("user");
+
+    window.location.reload();
+  });
+}
+
 /* ================= TOKEN ================= */
 
 function getToken() {
