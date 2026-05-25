@@ -7,7 +7,7 @@ const FACTIONS = [
     color: '#ff0000',
     desc: "Dołącz do grona administracji Vast Roleplay.",
 
-    webhook: 'https://discord.com/api/webhooks/1508141374342565958/xTp81fK2TzoYfYvWjio9HKiV_Y5mwj_1RI8lpDU1HomZ0KT9S_tgwZT6oHOfUHlU3Qim',
+    webhook: 'https://discord.com/api/webhooks/1508582508504027259/po5hxUh6WT83gMb6HOb8avONROkbjvNbVyVwcGUZ9XoTnN3hHfYFgIQLwrUQoE330_9z',
     roleId: '1507803370704863454',
 
     questions: [
