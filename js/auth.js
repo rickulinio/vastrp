@@ -90,3 +90,14 @@ if (savedUser && !token) {
   const user = JSON.parse(savedUser);
   renderUser(user);
 }
+
+document.getElementById("loginBtnMobile").textContent = "Profil";
+document.getElementById("loginBtnMobile").href = "/vast/index.html";
+
+const mobileUser = document.getElementById("userMobile");
+if (mobileUser && user) {
+  mobileUser.innerHTML = `
+    <img src="${avatarURL}" />
+    <span>${user.username}</span>
+  `;
+}
