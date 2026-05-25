@@ -1,13 +1,13 @@
-/* ─── SAFE HELPERS ─── */
-const $ = (id) => document.getElementById(id);
+/* ─── SAFE HELPER (NO CONFLICT VERSION) ─── */
+const $id = (id) => document.getElementById(id);
 
-/* ─── AUTH SYNC (LOGIN / PROFILE FIX) ─── */
+/* ─── AUTH SYNC ─── */
 (function authSync() {
   try {
     const savedUser = localStorage.getItem("user");
 
-    const loginBtn = document.getElementById("loginBtn");
-    const userBox = document.getElementById("user");
+    const loginBtn = $id("loginBtn");
+    const userBox = $id("user");
 
     if (!savedUser || savedUser === "undefined") {
       if (loginBtn) loginBtn.style.display = "inline-flex";
@@ -18,8 +18,7 @@ const $ = (id) => document.getElementById(id);
     let user;
     try {
       user = JSON.parse(savedUser);
-    } catch (e) {
-      console.warn("Invalid user in localStorage");
+    } catch {
       localStorage.removeItem("user");
       return;
     }
@@ -38,12 +37,12 @@ const $ = (id) => document.getElementById(id);
 
     userBox.innerHTML = `
       <div class="profile-dropdown">
-        <div class="profile-trigger" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
-          <img src="${avatarURL}" class="avatar-small" style="width:32px;height:32px;border-radius:50%;">
+        <div class="profile-trigger" style="cursor:pointer;display:flex;gap:8px;align-items:center;">
+          <img src="${avatarURL}" style="width:32px;height:32px;border-radius:50%;">
           <span>${user.username ?? "User"}</span>
         </div>
 
-        <div class="dropdown-menu" style="display:none; position:absolute;">
+        <div class="dropdown-menu" style="display:none;position:absolute;">
           <a href="settings.html">⚙ Settings</a>
           <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
           <a href="#" id="logoutBtn">🚪 Logout</a>
@@ -54,30 +53,25 @@ const $ = (id) => document.getElementById(id);
     const trigger = userBox.querySelector(".profile-trigger");
     const dropdown = userBox.querySelector(".dropdown-menu");
 
-    if (trigger && dropdown) {
-      trigger.addEventListener("click", () => {
-        dropdown.style.display =
-          dropdown.style.display === "block" ? "none" : "block";
-      });
-    }
+    trigger?.addEventListener("click", () => {
+      dropdown.style.display =
+        dropdown.style.display === "block" ? "none" : "block";
+    });
 
-    const logoutBtn = userBox.querySelector("#logoutBtn");
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        localStorage.removeItem("user");
-        location.reload();
-      });
-    }
+    userBox.querySelector("#logoutBtn")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("user");
+      location.reload();
+    });
+
   } catch (err) {
-    console.error("authSync crashed:", err);
+    console.error("AUTH ERROR:", err);
   }
 })();
 
-/* ─── RENDER FACTIONS ─── */
-const fg = $("factions-grid");
-
-if (fg && Array.isArray(FACTIONS)) {
+/* ─── FACTIONS ─── */
+const fg = $id("factions-grid");
+if (fg && typeof FACTIONS !== "undefined") {
   FACTIONS.forEach(f => {
     const el = document.createElement("div");
     el.className = "faction-card reveal";
@@ -86,36 +80,24 @@ if (fg && Array.isArray(FACTIONS)) {
     el.innerHTML = `
       <div class="fc-top">
         <div class="fc-icon">${f.icon}</div>
-        <div>
-          <div class="fc-name">${f.name}</div>
-        </div>
+        <div class="fc-name">${f.name}</div>
       </div>
-
       <p class="fc-desc">${f.desc}</p>
-
-      <button
-        class="fc-cta"
-        style="--fc:${f.color};background:${f.color}18;border-color:${f.color}30;"
-        onclick="openModal('${f.key}')"
-      >
-        Złóż Podanie <span>→</span>
-      </button>
     `;
 
     fg.appendChild(el);
   });
 }
 
-/* ─── RENDER TEAM ─── */
-const tg = $("team-grid");
-
-if (tg && Array.isArray(TEAM)) {
+/* ─── TEAM ─── */
+const tg = $id("team-grid");
+if (tg && typeof TEAM !== "undefined") {
   TEAM.forEach(m => {
     tg.innerHTML += `
       <div class="team-card reveal">
-        <img class="team-av" src="${m.image}" alt="${m.name}">
-        <div class="team-name">${m.name}</div>
-        <div class="team-role">${m.role}</div>
+        <img src="${m.image}" class="team-av">
+        <div>${m.name}</div>
+        <div>${m.role}</div>
       </div>
     `;
   });
@@ -123,10 +105,8 @@ if (tg && Array.isArray(TEAM)) {
 
 /* ─── NAV SCROLL ─── */
 window.addEventListener("scroll", () => {
-  const nav = $("nav");
-  if (!nav) return;
-
-  nav.classList.toggle("scrolled", scrollY > 20);
+  const nav = $id("nav");
+  if (nav) nav.classList.toggle("scrolled", scrollY > 20);
 });
 
 /* ─── COUNTERS ─── */
@@ -144,137 +124,26 @@ function countUp(el, to, dur) {
 }
 
 setTimeout(() => {
-  countUp($("s-players"), 47, 1200);
-  countUp($("s-discord"), 1284, 1800);
+  countUp($id("s-players"), 47, 1200);
+  countUp($id("s-discord"), 1284, 1800);
 }, 300);
 
-/* ─── REVEAL ─── */
-const obs = new IntersectionObserver((entries) => {
-  entries.forEach((e, i) => {
-    if (e.isIntersecting) {
-      setTimeout(() => e.target.classList.add("visible"), i * 60);
-    }
-  });
-}, { threshold: 0.08 });
-
-document.querySelectorAll(".reveal")
-  .forEach(el => obs.observe(el));
-
-/* ─── RULE HIGHLIGHT ─── */
-const ruleItems = document.querySelectorAll(".rule-item");
-
-if (ruleItems.length) {
-  const ruleObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        document.querySelectorAll(".rule-title")
-          .forEach(t => t.classList.remove("active"));
-
-        const title = entry.target.querySelector(".rule-title");
-        if (title) title.classList.add("active");
-      }
-    });
-  }, { threshold: 0.6 });
-
-  ruleItems.forEach(item => ruleObserver.observe(item));
-}
-
-/* ─── KEY EFFECT ─── */
-document.querySelectorAll(".key").forEach(key => {
-  key.addEventListener("click", () => {
-    key.classList.toggle("show");
-
-    setTimeout(() => {
-      key.classList.remove("show");
-    }, 1600);
-  });
-});
-
-/* ─── MOBILE MENU ─── */
-const navToggle = $("navToggle");
-const mobileMenu = $("mobileMenu");
-const mobileOverlay = $("mobileOverlay");
-
-function openMenu() {
-  if (!mobileMenu || !mobileOverlay || !navToggle) return;
-
-  mobileMenu.classList.add("active");
-  mobileOverlay.classList.add("active");
-  navToggle.textContent = "✕";
-}
-
-function closeMenu() {
-  if (!mobileMenu || !mobileOverlay || !navToggle) return;
-
-  mobileMenu.classList.remove("active");
-  mobileOverlay.classList.remove("active");
-  navToggle.textContent = "☰";
-}
-
-if (navToggle) {
-  navToggle.addEventListener("click", () => {
-    if (mobileMenu?.classList.contains("active")) closeMenu();
-    else openMenu();
-  });
-}
-
-if (mobileOverlay) {
-  mobileOverlay.addEventListener("click", closeMenu);
-}
-
-document.querySelectorAll(".mobile-menu a").forEach(a => {
-  a.addEventListener("click", closeMenu);
-});
-
-/* ─── CURSOR GLOW ─── */
-const glow = document.querySelector(".cursor-glow");
-
-if (glow) {
-  window.addEventListener("mousemove", e => {
-    glow.animate({
-      left: `${e.clientX}px`,
-      top: `${e.clientY}px`
-    }, {
-      duration: 350,
-      fill: "forwards"
-    });
-  });
-}
-
-/* ─── MAGNETIC BUTTONS ─── */
-document.querySelectorAll(".btn-lg").forEach(btn => {
-  btn.addEventListener("mousemove", e => {
-    const rect = btn.getBoundingClientRect();
-
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-
-    btn.style.transform =
-      `translate(${x * 0.12}px, ${y * 0.18}px)`;
-  });
-
-  btn.addEventListener("mouseleave", () => {
-    btn.style.transform = "";
-  });
-});
-
-/* ─── PARTICLES ─── */
+/* ─── PARTICLES SAFE ─── */
 const canvas = document.getElementById("particles");
 const ctx = canvas?.getContext("2d");
 
 if (canvas && ctx) {
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    const hero = document.querySelector(".hero");
-    canvas.height = hero ? hero.offsetHeight : window.innerHeight;
-  }
-
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
-
   const particles = [];
 
-  for (let i = 0; i < 60; i++) {
+  function resize() {
+    canvas.width = innerWidth;
+    canvas.height = document.querySelector(".hero")?.offsetHeight || innerHeight;
+  }
+
+  resize();
+  window.addEventListener("resize", resize);
+
+  for (let i = 0; i < 50; i++) {
     particles.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -284,7 +153,7 @@ if (canvas && ctx) {
     });
   }
 
-  function animateParticles() {
+  function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     particles.forEach(p => {
@@ -300,8 +169,8 @@ if (canvas && ctx) {
       ctx.fill();
     });
 
-    requestAnimationFrame(animateParticles);
+    requestAnimationFrame(animate);
   }
 
-  animateParticles();
+  animate();
 }
