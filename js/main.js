@@ -293,12 +293,11 @@ if (canvas && ctx) {
       <span>${user.username}</span>
     </div>
 
-    <div class="profile-menu" id="profileMenu">
-      <a href="dashboard.html">📊 Dashboard</a>
-      <a href="settings.html">⚙ Settings</a>
-      <a href="https://discord.gg/gz3HhfZkNQ" target="_blank">💬 Discord</a>
-      <a href="#" id="logoutBtn">🚪 Logout</a>
-    </div>
+<div class="profile-menu" id="profileMenu">
+  <a href="#" id="logoutBtn">
+    Wyloguj się
+  </a>
+</div>
   `;
 
   const btn = document.getElementById("profileBtn");
