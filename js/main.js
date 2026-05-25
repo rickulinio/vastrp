@@ -1,56 +1,43 @@
-/* ================= SAFE HELPERS ================= */
+let progress = 0;
+
+const progressText = document.querySelector(".loader-progress-text");
+const loader = document.getElementById("loader");
+
+const interval = setInterval(() => {
+  progress += Math.floor(Math.random() * 8) + 2;
+
+  if (progress >= 100) {
+    progress = 100;
+    clearInterval(interval);
+
+    setTimeout(() => {
+      if (loader) {
+        loader.style.opacity = "0";
+        loader.style.pointerEvents = "none";
+      }
+    }, 500);
+  }
+
+  if (progressText) {
+    progressText.textContent = progress + "%";
+  }
+}, 80);
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    const l = document.getElementById("loader");
+    if (l) l.classList.add("hide");
+  }, 1800);
+});
+
+/* ─── SAFE HELPERS ─── */
 const $ = (id) => document.getElementById(id);
 
-/* ================= MAIN INIT ================= */
+/* ─── RENDER FACTIONS ─── */
+const fg = $("factions-grid");
 
-document.addEventListener("DOMContentLoaded", init);
-
-function init() {
-  try {
-    renderFactions();
-    renderTeam();
-    renderFAQ();
-
-    initFAQToggle();
-    initScrollNav();
-    initCounters();
-    initReveal();
-    initRules();
-    initKeys();
-    initMobileMenu();
-    initAuth();
-
-    // 🔥 ważne: loader na końcu
-    hideLoader();
-
-  } catch (err) {
-    console.error("MAIN ERROR:", err);
-    hideLoader();
-  }
-}
-
-/* ================= LOADER ================= */
-
-function hideLoader() {
-  const loader = $("loader");
-  if (!loader) return;
-
-  loader.classList.add("hidden");
-
-  setTimeout(() => {
-    loader.remove();
-  }, 400);
-}
-
-/* ================= FACTIONS ================= */
-
-function renderFactions() {
-  const fg = $("factions-grid");
-  if (!fg || !Array.isArray(window.FACTIONS)) return;
-
-  fg.innerHTML = "";
-
-  window.FACTIONS.forEach(f => {
+if (fg && Array.isArray(FACTIONS)) {
+  FACTIONS.forEach(f => {
     const el = document.createElement("div");
     el.className = "faction-card reveal";
     el.style.setProperty("--fc", f.color);
@@ -60,13 +47,13 @@ function renderFactions() {
         <div class="fc-icon">${f.icon}</div>
         <div>
           <div class="fc-name">${f.name}</div>
-          <span class="fc-tag">${f.tag}</span>
         </div>
       </div>
 
       <p class="fc-desc">${f.desc}</p>
 
-      <button class="fc-cta"
+      <button
+        class="fc-cta"
         style="--fc:${f.color};background:${f.color}18;border-color:${f.color}30;"
         onclick="openModal('${f.key}')"
       >
@@ -78,119 +65,63 @@ function renderFactions() {
   });
 }
 
-/* ================= TEAM ================= */
+/* ─── RENDER TEAM ─── */
+const tg = $("team-grid");
 
-function renderTeam() {
-  const tg = $("team-grid");
-  if (!tg || !Array.isArray(window.TEAM)) return;
-
-  tg.innerHTML = window.TEAM.map(m => `
-    <div class="team-card reveal">
-      <img class="team-av" src="${m.image}" alt="${m.name}">
-      <div class="team-name">${m.name}</div>
-      <div class="team-role">${m.role}</div>
-    </div>
-  `).join("");
-}
-
-/* ================= FAQ ================= */
-
-function renderFAQ() {
-  const fl = $("faq-list");
-  if (!fl || !Array.isArray(window.FAQS)) return;
-
-  fl.innerHTML = window.FAQS.map(item => `
-    <div class="faq-item">
-      <button class="faq-q" data-faq>
-        ${item.q}
-        <div class="faq-arrow">
-          <svg viewBox="0 0 24 24">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
-      </button>
-
-      <div class="faq-body">
-        <div class="faq-body-inner">${item.a}</div>
+if (tg && Array.isArray(TEAM)) {
+  TEAM.forEach(m => {
+    tg.innerHTML += `
+      <div class="team-card reveal">
+        <img class="team-av" src="${m.image}" alt="${m.name}">
+        <div class="team-name">${m.name}</div>
+        <div class="team-role">${m.role}</div>
       </div>
-    </div>
-  `).join("");
-}
-
-/* ================= FAQ TOGGLE ================= */
-
-function initFAQToggle() {
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-faq]");
-    if (!btn) return;
-
-    const item = btn.closest(".faq-item");
-    if (!item) return;
-
-    const isOpen = item.classList.contains("open");
-
-    document.querySelectorAll(".faq-item.open")
-      .forEach(i => i.classList.remove("open"));
-
-    if (!isOpen) item.classList.add("open");
+    `;
   });
 }
 
-/* ================= NAV ================= */
+/* ─── NAV SCROLL ─── */
+window.addEventListener("scroll", () => {
+  const nav = $("nav");
+  if (!nav) return;
 
-function initScrollNav() {
-  window.addEventListener("scroll", () => {
-    const nav = $("nav");
-    if (!nav) return;
+  nav.classList.toggle("scrolled", scrollY > 20);
+});
 
-    nav.classList.toggle("scrolled", window.scrollY > 20);
+/* ─── COUNTERS ─── */
+function countUp(el, to, dur) {
+  if (!el) return;
+
+  let v = 0;
+  const step = to / (dur / 16);
+
+  const t = setInterval(() => {
+    v = Math.min(v + step, to);
+    el.textContent = Math.floor(v);
+    if (v >= to) clearInterval(t);
+  }, 16);
+}
+
+setTimeout(() => {
+  countUp($("s-players"), 47, 1200);
+  countUp($("s-discord"), 1284, 1800);
+}, 300);
+
+/* ─── REVEAL ─── */
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add("visible"), i * 60);
+    }
   });
-}
+}, { threshold: 0.08 });
 
-/* ================= COUNTERS ================= */
+document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
 
-function initCounters() {
-  function countUp(el, to, dur) {
-    if (!el) return;
+/* ─── RULE HIGHLIGHT ─── */
+const ruleItems = document.querySelectorAll(".rule-item");
 
-    let v = 0;
-    const step = to / (dur / 16);
-
-    const t = setInterval(() => {
-      v = Math.min(v + step, to);
-      el.textContent = Math.floor(v);
-
-      if (v >= to) clearInterval(t);
-    }, 16);
-  }
-
-  setTimeout(() => {
-    countUp($("s-players"), 47, 1200);
-    countUp($("s-discord"), 1284, 1800);
-  }, 300);
-}
-
-/* ================= REVEAL ================= */
-
-function initReveal() {
-  const obs = new IntersectionObserver((entries, observer) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add("visible");
-        observer.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.08 });
-
-  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
-}
-
-/* ================= RULES ================= */
-
-function initRules() {
-  const ruleItems = document.querySelectorAll(".rule-item");
-  if (!ruleItems.length) return;
-
+if (ruleItems.length) {
   const ruleObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -206,115 +137,162 @@ function initRules() {
   ruleItems.forEach(item => ruleObserver.observe(item));
 }
 
-/* ================= KEY EFFECT ================= */
+/* ─── KEY EFFECT ─── */
+document.querySelectorAll(".key").forEach(key => {
+  key.addEventListener("click", () => {
+    key.classList.toggle("show");
 
-function initKeys() {
-  document.querySelectorAll(".key").forEach(key => {
-    key.addEventListener("click", () => {
-      key.classList.add("show");
+    setTimeout(() => {
+      key.classList.remove("show");
+    }, 1600);
+  });
+});
 
-      setTimeout(() => {
-        key.classList.remove("show");
-      }, 1600);
+/* ─── MOBILE MENU ─── */
+const navToggle = $("navToggle");
+const mobileMenu = $("mobileMenu");
+const mobileOverlay = $("mobileOverlay");
+
+function openMenu() {
+  if (!mobileMenu || !mobileOverlay || !navToggle) return;
+
+  mobileMenu.classList.add("active");
+  mobileOverlay.classList.add("active");
+  navToggle.textContent = "✕";
+}
+
+function closeMenu() {
+  if (!mobileMenu || !mobileOverlay || !navToggle) return;
+
+  mobileMenu.classList.remove("active");
+  mobileOverlay.classList.remove("active");
+  navToggle.textContent = "☰";
+}
+
+if (navToggle) {
+  navToggle.addEventListener("click", () => {
+    if (mobileMenu?.classList.contains("active")) closeMenu();
+    else openMenu();
+  });
+}
+
+if (mobileOverlay) mobileOverlay.addEventListener("click", closeMenu);
+
+document.querySelectorAll(".mobile-menu a").forEach(a => {
+  a.addEventListener("click", closeMenu);
+});
+
+/* ─── CURSOR GLOW ─── */
+const glow = document.querySelector(".cursor-glow");
+
+if (glow) {
+  window.addEventListener("mousemove", e => {
+    glow.animate({
+      left: `${e.clientX}px`,
+      top: `${e.clientY}px`
+    }, {
+      duration: 350,
+      fill: "forwards"
     });
   });
 }
 
-/* ================= MOBILE MENU ================= */
+/* ─── MAGNETIC BUTTONS ─── */
+document.querySelectorAll(".btn-lg").forEach(btn => {
+  btn.addEventListener("mousemove", e => {
+    const rect = btn.getBoundingClientRect();
 
-function initMobileMenu() {
-  const navToggle = $("navToggle");
-  const mobileMenu = $("mobileMenu");
-  const mobileOverlay = $("mobileOverlay");
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
 
-  function openMenu() {
-    mobileMenu?.classList.add("active");
-    mobileOverlay?.classList.add("active");
-    if (navToggle) navToggle.textContent = "✕";
-  }
-
-  function closeMenu() {
-    mobileMenu?.classList.remove("active");
-    mobileOverlay?.classList.remove("active");
-    if (navToggle) navToggle.textContent = "☰";
-  }
-
-  navToggle?.addEventListener("click", () => {
-    mobileMenu?.classList.contains("active") ? closeMenu() : openMenu();
+    btn.style.transform =
+      `translate(${x * 0.12}px, ${y * 0.18}px)`;
   });
 
-  mobileOverlay?.addEventListener("click", closeMenu);
-
-  document.querySelectorAll(".mobile-menu a").forEach(a => {
-    a.addEventListener("click", closeMenu);
+  btn.addEventListener("mouseleave", () => {
+    btn.style.transform = "";
   });
+});
+
+/* ─── PARTICLES ─── */
+const canvas = document.getElementById("particles");
+const ctx = canvas?.getContext("2d");
+
+if (canvas && ctx) {
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    const hero = document.querySelector(".hero");
+    canvas.height = hero ? hero.offsetHeight : window.innerHeight;
+  }
+
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const particles = [];
+
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.4,
+      dy: (Math.random() - 0.5) * 0.4
+    });
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += p.dx;
+      p.y += p.dy;
+
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animateParticles);
+  }
+
+  animateParticles();
 }
 
-/* ================= AUTH ================= */
+/* ─── SIMPLE AUTH (NO LAYOUT, ONLY LOGOUT BUTTON) ─── */
 
-function initAuth() {
-  function getUser() {
-    try {
-      return JSON.parse(localStorage.getItem("user"));
-    } catch {
-      return null;
-    }
-  }
+const savedUser = localStorage.getItem("user");
+const loginBtn = document.getElementById("loginBtn");
+const userBox = document.getElementById("user");
 
-  function getAvatar(user) {
-    return user?.avatar
-      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-      : `https://cdn.discordapp.com/embed/avatars/0.png`;
-  }
+if (!savedUser) {
+  if (loginBtn) loginBtn.style.display = "inline-flex";
+  if (userBox) userBox.innerHTML = "";
+} else {
+  const user = JSON.parse(savedUser);
 
-  function render() {
-    const user = getUser();
+  if (loginBtn) loginBtn.style.display = "none";
 
-    const loginBtn = $("loginBtn");
-    const userBox = $("user");
+  const avatar = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
-    if (!user || !userBox) {
-      if (loginBtn) loginBtn.style.display = "inline-flex";
-      if (userBox) userBox.innerHTML = "";
-      return;
-    }
-
-    if (loginBtn) loginBtn.style.display = "none";
-
+  // MINIMAL UI (reszta CSS robi robotę)
+  if (userBox) {
     userBox.innerHTML = `
-      <div class="user-dropdown">
-        <div class="user-trigger">
-          <img src="${getAvatar(user)}" class="user-avatar">
-          <span class="user-name">${user.username}</span>
-        </div>
-
-        <div class="user-menu">
-          <button class="logout-btn">Wyloguj się</button>
-        </div>
+      <div class="user-pill">
+        <img src="${avatar}" class="user-avatar">
+        <span class="user-name">${user.username}</span>
+        <button id="logoutBtn" class="logout-btn">Wyloguj</button>
       </div>
     `;
 
-    const trigger = userBox.querySelector(".user-trigger");
-    const menu = userBox.querySelector(".user-menu");
-    const logout = userBox.querySelector(".logout-btn");
-
-    trigger?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu?.classList.toggle("active");
-    });
-
-    logout?.addEventListener("click", () => {
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
       localStorage.removeItem("user");
-      render();
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!userBox.contains(e.target)) {
-        menu?.classList.remove("active");
-      }
+      location.reload();
     });
   }
-
-  window.addEventListener("auth:update", render);
-  render();
 }
