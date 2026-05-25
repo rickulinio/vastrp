@@ -1,4 +1,5 @@
 let progress = 0;
+
 const progressText = document.querySelector(".loader-progress-text");
 const loader = document.getElementById("loader");
 
@@ -10,24 +11,57 @@ const interval = setInterval(() => {
     clearInterval(interval);
 
     setTimeout(() => {
-      loader.style.opacity = "0";
-      loader.style.pointerEvents = "none";
+      if (loader) {
+        loader.style.opacity = "0";
+        loader.style.pointerEvents = "none";
+      }
     }, 500);
   }
 
-  progressText.textContent = progress + "%";
+  if (progressText) {
+    progressText.textContent = progress + "%";
+  }
 }, 80);
 
 window.addEventListener("load", () => {
-
   setTimeout(() => {
-    document.getElementById("loader").classList.add("hide");
+    const l = document.getElementById("loader");
+    if (l) l.classList.add("hide");
   }, 1800);
-
 });
 
 /* ─── SAFE HELPERS ─── */
 const $ = (id) => document.getElementById(id);
+
+/* ─── AUTH SYNC (🔥 FIX LOGIN NA HOME) ─── */
+(function authSync() {
+  const savedUser = localStorage.getItem("user");
+  if (!savedUser) return;
+
+  const user = JSON.parse(savedUser);
+
+  const loginBtn = $("loginBtn");
+  const userBox = $("user");
+
+  const avatarURL = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+  if (loginBtn) loginBtn.style.display = "none";
+
+  if (userBox) {
+    userBox.style.display = "flex";
+
+    userBox.innerHTML = `
+      <div class="profile">
+        <img class="avatar" src="${avatarURL}" />
+        <span>${user.username}</span>
+      </div>
+    `;
+
+    userBox.title = user.username;
+  }
+})();
 
 /* ─── RENDER FACTIONS ─── */
 const fg = $("factions-grid");
@@ -75,7 +109,6 @@ if (tg && Array.isArray(TEAM)) {
     `;
   });
 }
-
 
 /* ─── NAV SCROLL ─── */
 window.addEventListener("scroll", () => {
@@ -182,32 +215,24 @@ document.querySelectorAll(".mobile-menu a").forEach(a => {
   a.addEventListener("click", closeMenu);
 });
 
-/* ══════════════════════════════════════
-   CURSOR GLOW
-══════════════════════════════════════ */
-
+/* ─── CURSOR GLOW ─── */
 const glow = document.querySelector(".cursor-glow");
 
-window.addEventListener("mousemove", e => {
-
-  glow.animate({
-    left: `${e.clientX}px`,
-    top: `${e.clientY}px`
-  }, {
-    duration: 350,
-    fill: "forwards"
+if (glow) {
+  window.addEventListener("mousemove", e => {
+    glow.animate({
+      left: `${e.clientX}px`,
+      top: `${e.clientY}px`
+    }, {
+      duration: 350,
+      fill: "forwards"
+    });
   });
+}
 
-});
-
-/* ══════════════════════════════════════
-   MAGNETIC BUTTONS
-══════════════════════════════════════ */
-
+/* ─── MAGNETIC BUTTONS ─── */
 document.querySelectorAll(".btn-lg").forEach(btn => {
-
   btn.addEventListener("mousemove", e => {
-
     const rect = btn.getBoundingClientRect();
 
     const x = e.clientX - rect.left - rect.width / 2;
@@ -220,61 +245,52 @@ document.querySelectorAll(".btn-lg").forEach(btn => {
   btn.addEventListener("mouseleave", () => {
     btn.style.transform = "";
   });
-
 });
 
-/* ══════════════════════════════════════
-   PARTICLES
-══════════════════════════════════════ */
-
+/* ─── PARTICLES ─── */
 const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
+const ctx = canvas?.getContext("2d");
 
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = document.querySelector(".hero").offsetHeight;
+if (canvas && ctx) {
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    const hero = document.querySelector(".hero");
+    canvas.height = hero ? hero.offsetHeight : window.innerHeight;
+  }
+
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const particles = [];
+
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 1,
+      dx: (Math.random() - 0.5) * 0.4,
+      dy: (Math.random() - 0.5) * 0.4
+    });
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += p.dx;
+      p.y += p.dy;
+
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animateParticles);
+  }
+
+  animateParticles();
 }
-
-resizeCanvas();
-
-window.addEventListener("resize", resizeCanvas);
-
-const particles = [];
-
-for (let i = 0; i < 60; i++) {
-
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2 + 1,
-    dx: (Math.random() - 0.5) * 0.4,
-    dy: (Math.random() - 0.5) * 0.4
-  });
-
-}
-
-function animateParticles() {
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach(p => {
-
-    p.x += p.dx;
-    p.y += p.dy;
-
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
-    ctx.fill();
-
-  });
-
-  requestAnimationFrame(animateParticles);
-
-}
-
-animateParticles();
