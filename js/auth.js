@@ -13,54 +13,50 @@ if (loginBtn) {
     `&scope=identify`;
 }
 
-/* ================= GET TOKEN ================= */
+/* ================= TOKEN ================= */
 
 function getToken() {
   if (!window.location.hash) return null;
-
-  const params = new URLSearchParams(window.location.hash.substring(1));
-  return params.get("access_token");
-}
-
-const token = getToken();
-
-/* ================= CLEAN URL ================= */
-
-function cleanUrl() {
-  window.history.replaceState({}, document.title, window.location.pathname);
+  return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
 
 /* ================= LOGIN FLOW ================= */
 
-if (token) {
-  cleanUrl();
+async function handleLogin() {
+  const token = getToken();
+  if (!token) return;
 
-  fetch("https://discord.com/api/users/@me", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-    .then(r => r.json())
-    .then(user => {
-      localStorage.setItem("user", JSON.stringify(user));
-
-      // 🔥 NAJWAŻNIEJSZE: zawsze ROOT
-      window.location.replace(BASE_URL);
-    })
-    .catch(() => {
-      localStorage.removeItem("user");
+  try {
+    const res = await fetch("https://discord.com/api/users/@me", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     });
+
+    const user = await res.json();
+
+    if (!user || !user.id) throw new Error("Invalid user");
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // czyścimy hash PO zapisie
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    // redirect dopiero po zapisie
+    window.location.replace(BASE_URL);
+
+  } catch (e) {
+    console.log("Login error:", e);
+    localStorage.removeItem("user");
+  }
 }
 
-/* ================= AUTO FIX LOOP ================= */
+handleLogin();
+
+/* ================= AUTO RESTORE ================= */
 
 const savedUser = localStorage.getItem("user");
 
-if (savedUser) {
-  const isLoginPage = window.location.pathname.includes("login.html");
-
-  // jeśli ktoś przypadkiem wpadł na login.html → cofka
-  if (isLoginPage) {
-    window.location.replace(BASE_URL);
-  }
+if (savedUser && window.location.pathname.includes("login.html")) {
+  window.location.replace(BASE_URL);
 }
