@@ -301,9 +301,9 @@ if (canvas && ctx) {
   const loginBtn = document.getElementById("loginBtn");
   const userBox = document.getElementById("user");
 
-  if (!saved) {
+  if (!saved || !userBox) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
-    if (userBox) userBox.style.display = "none";
+    if (userBox) userBox.innerHTML = "";
     return;
   }
 
@@ -316,13 +316,10 @@ if (canvas && ctx) {
   // hide login
   if (loginBtn) loginBtn.style.display = "none";
 
-  if (!userBox) return;
-
-  userBox.style.display = "block";
-
+  // IMPORTANT: NIE nadpisujemy całego nav layoutu
   userBox.innerHTML = `
     <div class="profile-wrap" id="profileBtn">
-      <img src="${avatar}">
+      <img src="${avatar}" style="width:32px;height:32px;border-radius:50%;">
       <span>${user.username}</span>
     </div>
 
@@ -337,20 +334,19 @@ if (canvas && ctx) {
   const btn = document.getElementById("profileBtn");
   const menu = document.getElementById("profileMenu");
 
-  // toggle dropdown
-  btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    menu.style.display =
-      menu.style.display === "block" ? "none" : "block";
-  });
+  if (btn && menu) {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.style.display =
+        menu.style.display === "block" ? "none" : "block";
+    });
 
-  // close on click outside
-  document.addEventListener("click", () => {
-    if (menu) menu.style.display = "none";
-  });
+    document.addEventListener("click", () => {
+      menu.style.display = "none";
+    });
+  }
 
-  // logout
-  document.getElementById("logoutBtn").addEventListener("click", (e) => {
+  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
     e.preventDefault();
     localStorage.removeItem("user");
     location.reload();

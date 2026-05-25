@@ -1796,11 +1796,10 @@ body {
   opacity: 1;
 }
 
-.nav-user {
-  position: relative;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
+.nav-user{
+  display:flex;
+  align-items:center;
+  position:relative;
 }
 
 /* avatar */
