@@ -1,127 +1,32 @@
-/* ================= LOADER ================= */
-
-let progress = 0;
-
-const progressText = document.querySelector(".loader-progress-text");
-const loader = document.getElementById("loader");
-
-const interval = setInterval(() => {
-  progress += Math.floor(Math.random() * 8) + 2;
-
-  if (progress >= 100) {
-    progress = 100;
-    clearInterval(interval);
-
-    setTimeout(() => {
-      loader?.classList.add("hide");
-      if (loader) {
-        loader.style.opacity = "0";
-        loader.style.pointerEvents = "none";
-      }
-    }, 400);
-  }
-
-  if (progressText) {
-    progressText.textContent = progress + "%";
-  }
-}, 80);
-
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    loader?.classList.add("hide");
-  }, 1500);
-});
-
-
-/* ================= SAFE HELPERS ================= */
-
+/* ─── SAFE HELPERS ─── */
 const $ = (id) => document.getElementById(id);
 
-
-/* ================= AUTH UI ================= */
-
-function renderAuthUI() {
-  let user = null;
-
-  try {
-    user = JSON.parse(localStorage.getItem("user"));
-  } catch {
-    user = null;
-  }
-
-  const loginBtn = $("loginBtn");
-  const userBox = $("user");
-
-  if (!userBox) return;
-
-  // brak usera
-  if (!user) {
-    if (loginBtn) loginBtn.style.display = "inline-flex";
-    userBox.innerHTML = "";
-    return;
-  }
-
-  // user zalogowany
-  if (loginBtn) loginBtn.style.display = "none";
-
-  const avatar = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-
-  userBox.innerHTML = `
-    <div class="user-dropdown">
-      <div class="user-trigger" id="userTrigger">
-        <img src="${avatar}" class="user-avatar">
-        <span class="user-name">${user.username || "User"}</span>
-      </div>
-
-      <div class="user-menu" id="userMenu">
-        <button class="logout-btn" id="logoutBtn">Wyloguj</button>
-      </div>
-    </div>
-  `;
-
-  const trigger = $("userTrigger");
-  const menu = $("userMenu");
-
-  if (trigger && menu) {
-    trigger.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.toggle("active");
-    });
-
-    document.addEventListener("click", () => {
-      menu.classList.remove("active");
-    });
-  }
-
-  $("logoutBtn")?.addEventListener("click", () => {
-    localStorage.removeItem("user");
-    location.reload();
-  });
-}
-
-
-/* ================= FACTIONS ================= */
-
+/* ─── RENDER FACTIONS ─── */
 const fg = $("factions-grid");
 
 if (fg && Array.isArray(FACTIONS)) {
   FACTIONS.forEach(f => {
-    const el = document.createElement("div");
-    el.className = "faction-card reveal";
-    el.style.setProperty("--fc", f.color);
+    const el = document.createElement('div');
+    el.className = 'faction-card reveal';
+    el.style.setProperty('--fc', f.color);
 
     el.innerHTML = `
       <div class="fc-top">
         <div class="fc-icon">${f.icon}</div>
-        <div class="fc-name">${f.name}</div>
+        <div>
+          <div class="fc-name">${f.name}</div>
+          <span class="fc-tag">${f.tag}</span>
+        </div>
       </div>
 
       <p class="fc-desc">${f.desc}</p>
 
-      <button class="fc-cta" onclick="openModal('${f.key}')">
-        Złóż Podanie →
+      <button
+        class="fc-cta"
+        style="--fc:${f.color};background:${f.color}18;border-color:${f.color}30;"
+        onclick="openModal('${f.key}')"
+      >
+        Złóż Podanie <span>→</span>
       </button>
     `;
 
@@ -129,16 +34,14 @@ if (fg && Array.isArray(FACTIONS)) {
   });
 }
 
-
-/* ================= TEAM ================= */
-
+/* ─── RENDER TEAM ─── */
 const tg = $("team-grid");
 
 if (tg && Array.isArray(TEAM)) {
   TEAM.forEach(m => {
     tg.innerHTML += `
       <div class="team-card reveal">
-        <img class="team-av" src="${m.image}">
+        <img class="team-av" src="${m.image}" alt="${m.name}">
         <div class="team-name">${m.name}</div>
         <div class="team-role">${m.role}</div>
       </div>
@@ -146,17 +49,52 @@ if (tg && Array.isArray(TEAM)) {
   });
 }
 
+/* ─── RENDER FAQ ─── */
+const fl = $("faq-list");
 
-/* ================= NAV ================= */
+if (fl && Array.isArray(FAQS)) {
+  FAQS.forEach(item => {
+    fl.innerHTML += `
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ${item.q}
+          <div class="faq-arrow">
+            <svg viewBox="0 0 24 24">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </button>
 
-window.addEventListener("scroll", () => {
+        <div class="faq-body">
+          <div class="faq-body-inner">${item.a}</div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+/* ─── FAQ TOGGLE ─── */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  if (!item) return;
+
+  const isOpen = item.classList.contains('open');
+
+  document.querySelectorAll('.faq-item.open')
+    .forEach(i => i.classList.remove('open'));
+
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ─── NAV SCROLL ─── */
+window.addEventListener('scroll', () => {
   const nav = $("nav");
-  if (nav) nav.classList.toggle("scrolled", scrollY > 20);
+  if (!nav) return;
+
+  nav.classList.toggle('scrolled', scrollY > 20);
 });
 
-
-/* ================= COUNTERS ================= */
-
+/* ─── COUNTERS ─── */
 function countUp(el, to, dur) {
   if (!el) return;
 
@@ -175,64 +113,81 @@ setTimeout(() => {
   countUp($("s-discord"), 1284, 1800);
 }, 300);
 
-
-/* ================= REVEAL ================= */
-
+/* ─── REVEAL ─── */
 const obs = new IntersectionObserver((entries) => {
   entries.forEach((e, i) => {
     if (e.isIntersecting) {
-      setTimeout(() => e.target.classList.add("visible"), i * 60);
+      setTimeout(() => e.target.classList.add('visible'), i * 60);
     }
   });
 }, { threshold: 0.08 });
 
-document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+document.querySelectorAll('.reveal')
+  .forEach(el => obs.observe(el));
 
+/* ─── RULE HIGHLIGHT ─── */
+const ruleItems = document.querySelectorAll('.rule-item');
 
-/* ================= RULES ================= */
+if (ruleItems.length) {
+  const ruleObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
 
-document.querySelectorAll(".rule-item").forEach(item => {
-  item.addEventListener("mouseenter", () => {
-    document.querySelectorAll(".rule-title")
-      .forEach(t => t.classList.remove("active"));
+        document.querySelectorAll('.rule-title')
+          .forEach(t => t.classList.remove('active'));
 
-    item.querySelector(".rule-title")?.classList.add("active");
+        const title = entry.target.querySelector('.rule-title');
+        if (title) title.classList.add('active');
+      }
+    });
+  }, { threshold: 0.6 });
+
+  ruleItems.forEach(item => ruleObserver.observe(item));
+}
+
+/* ─── KEY EFFECT ─── */
+document.querySelectorAll('.key').forEach(key => {
+  key.addEventListener('click', () => {
+    key.classList.toggle('show');
+
+    setTimeout(() => {
+      key.classList.remove('show');
+    }, 1600);
   });
 });
 
-
-/* ================= MENU ================= */
-
+/* ─── MOBILE MENU ─── */
 const navToggle = $("navToggle");
 const mobileMenu = $("mobileMenu");
 const mobileOverlay = $("mobileOverlay");
 
 function openMenu() {
-  mobileMenu?.classList.add("active");
-  mobileOverlay?.classList.add("active");
-  if (navToggle) navToggle.textContent = "✕";
+  if (!mobileMenu || !mobileOverlay || !navToggle) return;
+
+  mobileMenu.classList.add("active");
+  mobileOverlay.classList.add("active");
+  navToggle.textContent = "✕";
 }
 
 function closeMenu() {
-  mobileMenu?.classList.remove("active");
-  mobileOverlay?.classList.remove("active");
-  if (navToggle) navToggle.textContent = "☰";
+  if (!mobileMenu || !mobileOverlay || !navToggle) return;
+
+  mobileMenu.classList.remove("active");
+  mobileOverlay.classList.remove("active");
+  navToggle.textContent = "☰";
 }
 
-navToggle?.addEventListener("click", () => {
-  mobileMenu?.classList.contains("active") ? closeMenu() : openMenu();
-});
+if (navToggle) {
+  navToggle.addEventListener("click", () => {
+    if (mobileMenu?.classList.contains("active")) closeMenu();
+    else openMenu();
+  });
+}
 
-mobileOverlay?.addEventListener("click", closeMenu);
+if (mobileOverlay) {
+  mobileOverlay.addEventListener("click", closeMenu);
+}
 
 document.querySelectorAll(".mobile-menu a").forEach(a => {
   a.addEventListener("click", closeMenu);
-});
-
-
-/* ================= INIT ================= */
-
-// 🔥 WAŻNE: dopiero po DOM
-window.addEventListener("DOMContentLoaded", () => {
-  renderAuthUI();
 });
