@@ -34,13 +34,18 @@ function getToken() {
   return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 }
 
+/* ================= CLEAN URL ================= */
+
+function cleanUrl() {
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
+
 const token = getToken();
 
 /* ================= LOGIN FLOW ================= */
 
 if (token) {
-  // usuń hash z URL
-  window.history.replaceState({}, document.title, window.location.pathname);
+  cleanUrl();
 
   fetch("https://discord.com/api/users/@me", {
     headers: {
@@ -53,20 +58,21 @@ if (token) {
 
       saveUser(user);
 
-      // MAŁY DELAY żeby localStorage się zapisał
-      setTimeout(() => {
-        window.location.href = BASE_URL;
-      }, 150);
+      // 🔥 NAJSTABILNIEJSZY REDIRECT (ZERO LOOPÓW)
+      window.location.replace(BASE_URL);
     })
     .catch(() => {
       localStorage.removeItem("user");
     });
 }
 
-/* ================= AUTO REDIRECT ================= */
+/* ================= AUTO FIX ================= */
 
 const saved = getSavedUser();
 
-if (saved && window.location.pathname.includes("login.html")) {
-  window.location.replace(BASE_URL);
+if (saved) {
+  // jeśli ktoś jest zalogowany i siedzi na login.html → wywal go na home
+  if (window.location.pathname.includes("login.html")) {
+    window.location.replace(BASE_URL);
+  }
 }
