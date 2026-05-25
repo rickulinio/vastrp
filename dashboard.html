@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard | Vast RP</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+<nav class="nav" id="nav">
+  <a href="index.html" class="nav-logo">
+    <img src="img/logo.png" class="nav-logo-img">
+  </a>
+
+  <div class="nav-action">
+    <a href="index.html" class="nav-btn nav-btn-ghost">Home</a>
+    <a href="#" class="nav-btn nav-btn-fill" id="logoutBtn">Logout</a>
+  </div>
+</nav>
+
+<section class="dashboard-wrap">
+
+  <div class="dash-hero reveal">
+    <h1>Twój Dashboard</h1>
+    <p>Zarządzaj swoim profilem na serwerze</p>
+  </div>
+
+  <div class="dash-grid">
+
+    <div class="dash-card reveal">
+      <div class="dash-title">Profil</div>
+
+      <div class="dash-profile" id="userBox"></div>
+
+    </div>
+
+    <div class="dash-card reveal">
+      <div class="dash-title">Status</div>
+      <div class="dash-value" id="status">Ładowanie...</div>
+    </div>
+
+    <div class="dash-card reveal">
+      <div class="dash-title">Discord ID</div>
+      <div class="dash-value" id="userid">---</div>
+    </div>
+
+  </div>
+
+</section>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

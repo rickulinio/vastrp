@@ -1904,3 +1904,73 @@ body {
 .dropdown-menu.active {
   display: flex;
 }
+
+.dashboard-wrap{
+  padding:120px 10%;
+}
+
+.dash-hero{
+  margin-bottom:40px;
+}
+
+.dash-hero h1{
+  font-size:42px;
+  color:white;
+}
+
+.dash-hero p{
+  opacity:.7;
+}
+
+.dash-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+
+.dash-card{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  padding:20px;
+  border-radius:16px;
+  transition:.3s;
+}
+
+.dash-card:hover{
+  transform:translateY(-5px);
+  border-color:rgba(255,255,255,0.25);
+}
+
+.dash-title{
+  font-size:14px;
+  opacity:.6;
+  margin-bottom:10px;
+}
+
+.dash-value{
+  font-size:18px;
+  color:white;
+}
+
+.dash-user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.dash-avatar{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+}
+
+.dash-name{
+  color:white;
+  font-weight:600;
+}
+
+.dash-sub{
+  font-size:12px;
+  opacity:.6;
+}
