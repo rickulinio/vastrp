@@ -36,31 +36,31 @@ const FACTIONS = [
           {
             id: 'adm5',
             label: 'Co planujesz odgrywać na naszym serwerze',
-            type: 'input',
+            type: 'textarea',
             required: true
           },
           {
             id: 'adm6',
-            label: 'Ile czasu w ciągu dnia jesteś w stanie poświęcić na sprawy administracyjne',
+            label: 'Ile czasu w ciągu dnia jesteś w stanie poświęcić na sprawy administracyjne:',
             type: 'input',
             required: true
           },
           {
             id: 'adm7',
-            label: 'Twoje doświadczenie w administracji (stopnie, serwer, ilość godzin)',
-            type: 'input',
+            label: 'Poprzednie doświadczenie w administracji:',
+            type: 'textarea',
             required: true
           },
           {
             id: 'adm8',
-            label: 'Jak zareagujesz, gdy podczas rządowego osoby będą się przekrzykiwać i nie dopuszcza cię do słowa',
-            type: 'input',
+            label: 'Jak zareagujesz, gdy podczas rządowego osoby będą się przekrzykiwać i nie dopuszcza cię do słowa:',
+            type: 'textarea',
             required: true
           },
           {
             id: 'adm9',
             label: 'Jak powinien wyglądać poprawny "rządowy"',
-            type: 'input',
+            type: 'textarea',
             required: true
           },
         ]
@@ -144,8 +144,8 @@ const FACTIONS = [
           },
           {
             id: '9',
-            label: 'Czy byłeś karany jak tak to za co?',
-            type: 'input',
+            label: 'Czy byłeś karany, jak tak to za co?',
+            type: 'textarea',
             required: true
           },
           {
@@ -156,13 +156,13 @@ const FACTIONS = [
           },
           {
             id: '11',
-            label: 'Jeśli gdzieś wcześniej służyłeś to gdzie',
-            type: 'input',
+            label: 'Poprzednie doświadczenia we frakcji:',
+            type: 'textarea',
             required: true
           },
           {
             id: '12',
-            label: 'List motywacyjny min 100słów',
+            label: 'List motywacyjny: (min 100 słów)',
             type: 'textarea',
             required: true
           }
@@ -224,7 +224,7 @@ const FACTIONS = [
         },
         {
           id: '7321321',
-          label: 'Jakie posiadasz doświadczenie w pracy jako mechanik:',
+          label: 'Poprzednie doświadczenie:',
           type: 'textarea',
           required: true
         },
@@ -237,7 +237,7 @@ const FACTIONS = [
         {
           id: '3123219',
           label: 'Na jakim stopniu chciałbyś się znaleźć w przyszłości?',
-          type: 'input',
+          type: 'textarea',
           required: true
         },
         {
@@ -339,25 +339,25 @@ const FACTIONS = [
           },
           {
             id: '24',
-            label: 'CZY BYLES/BYLAS KARANA OGRANIECZENIEM WOLNOSCI:',
+            label: 'Czy byłeś karany:',
             type: 'input',
             required: true
           },
           {
             id: '25',
-            label: 'PRAWO JAZDY',
+            label: 'Prawo jazdy:',
             type: 'input',
             required: true
           },
           {
             id: '26',
-            label: 'DLACZEGO TY',
+            label: 'Dlaczego ty:',
             type: 'textarea',
             required: true
           },
           {
             id: '27',
-            label: 'LIST MOTYWACYJNY',
+            label: 'List motywacyjny:',
             type: 'textarea',
             required: true
           }
