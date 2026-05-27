@@ -43,16 +43,21 @@
     <li><a href="#rules">Regulamin</a></li>
   </ul>
 
-<div class="nav-action">
-    <a href="#applications" class="nav-btn nav-btn-ghost">Złóż Podanie</a>
-    
-    <a href="panel.html" class="nav-btn nav-btn-fill" id="panelBtn" style="display: none; background: #ff4757;">
-        Panel Admina
+  <div class="nav-action">
+
+    <a href="#applications" class="nav-btn nav-btn-ghost">
+      Złóż Podanie
     </a>
 
-    <a href="login.html" class="nav-btn nav-btn-fill" id="loginBtn">Zaloguj</a>
+    <!-- LOGIN -->
+    <a href="login.html" class="nav-btn nav-btn-fill" id="loginBtn">
+      Zaloguj
+    </a>
+
+    <!-- PROFILE (UKRYTE DOMYŚLNIE) -->
     <div id="user" class="nav-user nav-dropdown"></div>
-</div>
+
+  </div>
 
 </nav>
 
@@ -486,12 +491,9 @@
 <div class="modal-bg" id="modalBg">
   <div class="modal-box" id="modalBox"></div>
 </div>
-<script src="config.js"></script>
-<script src="data.js"></script>
-
-<!-- POTEM LOGIKA -->
+<script src="js/data.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/modal.js"></script>
 <script src="js/main.js"></script>
+<script src="js/modal.js"></script>
 </body>
 </html>
