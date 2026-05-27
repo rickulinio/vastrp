@@ -1,6 +1,56 @@
 const FACTIONS = [
 
   {
+    key: 'podanienafirme', 
+    name: 'FIRMA',
+    icon: '🏬',
+    color: '#caa35e',
+    desc: "Załóż firmę tutaj!",
+
+    webhook: 'https://discord.com/api/webhooks/1509270202318192640/7WTh4gmZDL2MBwWkR8EyUf-GQ-bMAKrcjepngr7B5Q5e-EsWc8T9tKx7Py_ktlYWJv96',
+    roleId: '1480310121707077753',
+
+    questions: [
+      {
+        section: 'OOC',
+        items: [
+          {
+            id: 'firma1',
+            label: 'Ile masz lat',
+            type: 'input',
+            required: true,
+            maxLength: 2
+          },
+          {
+            id: 'firma2',
+            label: 'Ile masz przegranych godzin w fivem:',
+            type: 'input',
+            required: true,
+          },
+          {
+            id: 'firma3',
+            label: 'Ile posiadasz ludzi:',
+            type: 'input',
+            required: true,
+          },
+          {
+            id: 'firma4',
+            label: 'Jaka firma:',
+            type: 'input',
+            required: true,
+          },
+          {
+            id: 'firma5',
+            label: 'Plan na firmę:',
+            type: 'textarea',
+            required: true,
+          },
+        ]
+      },
+    ]
+  },
+
+  {
     key: 'adm', 
     name: 'ADMINISTRACJA',
     icon: '🚨',
