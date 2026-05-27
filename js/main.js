@@ -361,18 +361,19 @@ async function updateServerStats() {
 }
 
 function animateCounter(element, target) {
-  let current = parseInt(element.innerText);
-  const step = Math.ceil((target - current) / 10);
-  const timer = setInterval(() => {
-    current += step;
-    element.innerText = current;
-    if (Math.abs(current - target) < Math.abs(step)) {
-      element.innerText = target;
-      clearInterval(timer);
-    }
-  }, 50);
-}
+  const duration = 1500; // 1.5 sekundy
+  const start = parseInt(element.innerText) || 0;
+  const startTime = performance.now();
 
-// Odświeżaj co 30 sekund
-updateServerStats();
-setInterval(updateServerStats, 30000);
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Easing dla płynności
+    const val = Math.floor(start + (target - start) * (1 - Math.pow(1 - progress, 3)));
+    element.innerText = val;
+
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
