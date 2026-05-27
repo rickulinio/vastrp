@@ -49,8 +49,9 @@
       Złóż Podanie
     </a>
 
-    <a href="https://discord.gg/gz3HhfZkNQ" target="_blank" class="nav-btn nav-btn-fill">
-      Discord
+    <!-- LOGIN -->
+    <a href="login.html" class="nav-btn nav-btn-fill" id="loginBtn">
+      Zaloguj
     </a>
 
     <!-- PROFILE (UKRYTE DOMYŚLNIE) -->
@@ -71,7 +72,6 @@
 
   <div class="mobile-buttons">
     <a href="#applications" class="btn-mobile ghost">Złóż Podanie</a>
-    <a href="https://discord.gg/gz3HhfZkNQ" target="_blank" class="btn-mobile fill">Discord</a>
   </div>
 </div>
 
@@ -473,11 +473,12 @@
   </footer>
 
   <!-- MODAL -->
-  <div class="modal-bg" id="modalBg" onclick="onModalBgClick(event)">
-    <div class="modal-box" id="modalBox"></div>
-  </div>
-<script src="js/data.js" defer></script>
-  <script src="js/main.js" defer></script>
-  <script src="js/modal.js" defer></script>
+<div class="modal-bg" id="modalBg">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script src="js/modal.js"></script>
 </body>
 </html>
