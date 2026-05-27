@@ -1,92 +1,107 @@
 const CLIENT_ID = "1480598374024483012";
-const BASE_URL = "https://rickulinio.github.io/vast/";
+const REDIRECT_URI = "https://rickulinio.github.io/vast/";
 
-/* STORAGE */
+/* ================= STORAGE ================= */
+
 function saveUser(user) {
   localStorage.setItem("user", JSON.stringify(user));
+}
+
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
 }
 
 function clearUser() {
   localStorage.removeItem("user");
 }
 
-/* TOKEN */
-function getTokenFromHash() {
-  const hash = window.location.hash.substring(1);
-  if (!hash) return null;
-  const params = new URLSearchParams(hash);
-  return params.get("access_token");
-}
+/* ================= EVENT ================= */
 
-/* CLEAN URL - czyści hash bez przeładowania strony */
-function cleanUrl() {
-  window.history.replaceState(null, "", window.location.pathname);
-}
-
-/* EVENT */
 function triggerAuthUpdate() {
   window.dispatchEvent(new Event("auth:update"));
 }
 
-/* DISCORD LOGIN */
+/* ================= LOGIN URL ================= */
+
 function getDiscordLoginURL() {
-  return `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(BASE_URL)}&response_type=token&scope=identify`;
+  return `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
+    REDIRECT_URI
+  )}&response_type=token&scope=identify`;
 }
 
-/* FETCH USER */
+/* ================= TOKEN PARSER (TYMCZASOWY) ================= */
+
+function getAndClearToken() {
+  const hash = window.location.hash;
+  if (!hash.includes("access_token")) return null;
+
+  const params = new URLSearchParams(hash.substring(1));
+  const token = params.get("access_token");
+
+  // Token zwracamy tylko do funkcji, nie zapisujemy go w localStorage
+  return token;
+}
+
+/* ================= DISCORD FETCH ================= */
+
 async function fetchDiscordUser(token) {
   const res = await fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   });
 
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.message || `Discord API error: ${res.status}`);
+    throw new Error("401");
   }
-  return res.json();
+
+  return await res.json();
 }
 
-/* LOGIN FLOW */
-async function handleLogin() {
-  const token = getTokenFromHash();
+/* ================= LOGIN FLOW ================= */
 
-  // Jeśli nie ma tokena, sprawdzamy czy mamy już zapisanego użytkownika
+async function handleLogin() {
+  const token = getAndClearToken();
+
+  // Jeśli nie ma tokena w URL, kończymy
   if (!token) {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) triggerAuthUpdate();
+    triggerAuthUpdate();
     return;
   }
 
   try {
-    console.log("Przetwarzanie tokena...");
-    const user = await fetchDiscordUser(token);
+    const discordUser = await fetchDiscordUser(token);
 
-    if (!user?.id) throw new Error("Invalid user response");
-
+    // Zapisujemy tylko wymagane dane
     const userData = {
-      id: user.id,
-      username: user.username,
-      avatar: user.avatar
-        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=512`
+      id: discordUser.id,
+      username: discordUser.global_name || discordUser.username,
+      avatar: discordUser.avatar
+        ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=512`
         : `https://cdn.discordapp.com/embed/avatars/0.png`
     };
 
     saveUser(userData);
-    console.log("Zalogowano:", userData.username);
+    triggerAuthUpdate();
+
+    // Czyścimy pasek adresu z tokena
+    history.replaceState(null, "", window.location.pathname);
 
   } catch (e) {
-    console.error("LOGIN ERROR:", e);
+    console.error("AUTH ERROR:", e);
     clearUser();
-  } finally {
-    // Czyścimy URL z tokena niezależnie od wyniku (sukces/błąd)
-    cleanUrl();
-    triggerAuthUpdate();
   }
 }
 
-/* INIT */
-window.addEventListener("DOMContentLoaded", () => {
+/* ================= INIT ================= */
+
+window.addEventListener("load", () => {
   const loginBtn = document.getElementById("loginBtn");
+
   if (loginBtn) {
     loginBtn.href = getDiscordLoginURL();
   }
