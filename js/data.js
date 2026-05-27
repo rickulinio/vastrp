@@ -628,6 +628,13 @@ const TEAM = [
   },
   {
     initials: 'MOD',
+    name: 'dirtowy',
+    role: 'Developer / Opiekun ADM',
+    bio: '',
+    image: 'team/dirtowy.webp'
+  },
+  {
+    initials: 'MOD',
     name: 'rickulinio',
     role: 'Administrator',
     bio: '',
@@ -639,12 +646,5 @@ const TEAM = [
     role: 'Administrator',
     bio: '',
     image: 'team/bartus.webp'
-  },
-  {
-    initials: 'MOD',
-    name: 'dirtowy',
-    role: 'Car Developer',
-    bio: '',
-    image: 'team/dirtowy.webp'
   },
 ];
