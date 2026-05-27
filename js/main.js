@@ -35,33 +35,32 @@ const $ = (id) => document.getElementById(id);
 /* ================= FACTIONS ================= */
 const fg = $("factions-grid");
 
-function renderFactions() {
-    fg.innerHTML = '';
-    FACTIONS.forEach(f => {
-        const isOpen = factionStatus[f.key];
-        const el = document.createElement("div");
-        el.className = "faction-card reveal";
-        el.style.setProperty("--fc", f.color);
+if (fg && Array.isArray(FACTIONS)) {
+  FACTIONS.forEach(f => {
+    const el = document.createElement("div");
+    el.className = "faction-card reveal";
+    el.style.setProperty("--fc", f.color);
 
-        el.innerHTML = `
-            <div class="fc-top">
-                <div class="fc-icon">${f.icon}</div>
-                <div class="fc-name">${f.name}</div>
-            </div>
-            <p class="fc-desc">${f.desc}</p>
-            <button
-                class="fc-cta ${!isOpen ? 'disabled' : ''}"
-                style="background:${isOpen ? f.color + '18' : '#333'};border-color:${isOpen ? f.color + '30' : '#444'};"
-                onclick="${isOpen ? `openModal('${f.key}')` : ''}"
-                ${!isOpen ? 'disabled' : ''}
-            >
-                ${isOpen ? 'Złóż Podanie →' : 'PODANIE ZAMKNIĘTE'}
-            </button>
-        `;
-        fg.appendChild(el);
-    });
+    el.innerHTML = `
+      <div class="fc-top">
+        <div class="fc-icon">${f.icon}</div>
+        <div class="fc-name">${f.name}</div>
+      </div>
+
+      <p class="fc-desc">${f.desc}</p>
+
+      <button
+        class="fc-cta"
+        style="background:${f.color}18;border-color:${f.color}30;"
+        onclick="openModal('${f.key}')"
+      >
+        Złóż Podanie →
+      </button>
+    `;
+
+    fg.appendChild(el);
+  });
 }
-renderFactions();
 
 /* ================= TEAM ================= */
 const tg = $("team-grid");
@@ -198,34 +197,33 @@ document.querySelectorAll(".btn-lg").forEach(btn => {
 });
 
 /* ================= AUTH UI ================= */
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+}
+
+function logout() {
+  localStorage.removeItem("user");
+  updateAuthUI();
+  window.dispatchEvent(new Event("auth:update"));
+}
+
 function updateAuthUI() {
   const user = getUser();
+
   const loginBtn = $("loginBtn");
   const userBox = $("user");
-  const navLinks = document.querySelector(".nav-links");
-
-  // TWOJE ID DO TESTÓW (wpisz tutaj swoje ID)
-  const ADMIN_IDS = ["TU_WPISZ_ID_DISCORDA_1", "TU_WPISZ_ID_DISCORDA_2"];
 
   if (!user || !user.id) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
     if (userBox) userBox.innerHTML = "";
-    
-    // Usuń przycisk Panel jeśli ktoś się wyloguje
-    const adminLink = document.getElementById("adminPanelLink");
-    if (adminLink) adminLink.remove();
     return;
   }
 
   if (loginBtn) loginBtn.style.display = "none";
-
-  // LOGIKA PANELU DLA ADMINA
-  if (ADMIN_IDS.includes(user.id) && !document.getElementById("adminPanelLink")) {
-    const li = document.createElement("li");
-    li.id = "adminPanelLink";
-    li.innerHTML = '<a href="panel.html" style="color: var(--primary-color); font-weight: bold;">PANEL</a>';
-    if (navLinks) navLinks.appendChild(li);
-  }
 
   if (userBox) {
     userBox.innerHTML = `
@@ -233,6 +231,7 @@ function updateAuthUI() {
         <div class="user-trigger" id="userTrigger">
           <img src="${user.avatar}" class="user-avatar" alt="${user.username}">
         </div>
+
         <div class="user-menu">
           <button id="logoutBtn" class="logout-btn">Wyloguj</button>
         </div>
@@ -258,6 +257,14 @@ function updateAuthUI() {
     });
   }
 }
+
+updateAuthUI();
+
+window.addEventListener("auth:update", updateAuthUI);
+
+window.addEventListener("storage", (e) => {
+  if (e.key === "user") updateAuthUI();
+});
 
 /* ================= PARTICLES ================= */
 const canvas = document.getElementById("particles");
