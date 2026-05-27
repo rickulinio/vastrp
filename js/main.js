@@ -340,3 +340,39 @@ if (canvas && ctx) {
 
   animate();
 }
+
+async function updateServerStats() {
+  const url = "http://193.111.250.98:30299/players.json";
+  const countEl = document.getElementById("player-count");
+  const listEl = document.getElementById("player-list");
+
+  try {
+    const response = await fetch(url);
+    const players = await response.json();
+    
+    // Animacja licznika
+    animateCounter(countEl, players.length);
+
+    // Aktualizacja listy graczy
+    listEl.innerHTML = players.map(p => `<div class="player-item">${p.name}</div>`).join('');
+  } catch (err) {
+    console.error("Błąd pobierania graczy:", err);
+  }
+}
+
+function animateCounter(element, target) {
+  let current = parseInt(element.innerText);
+  const step = Math.ceil((target - current) / 10);
+  const timer = setInterval(() => {
+    current += step;
+    element.innerText = current;
+    if (Math.abs(current - target) < Math.abs(step)) {
+      element.innerText = target;
+      clearInterval(timer);
+    }
+  }, 50);
+}
+
+// Odświeżaj co 30 sekund
+updateServerStats();
+setInterval(updateServerStats, 30000);
