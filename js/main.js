@@ -69,11 +69,13 @@ if (tg && Array.isArray(TEAM)) {
   TEAM.forEach(m => {
     const div = document.createElement("div");
     div.className = "team-card reveal";
+
     div.innerHTML = `
       <img src="${m.image}" class="team-av">
       <div class="team-name">${m.name}</div>
       <div class="team-role">${m.role}</div>
     `;
+
     tg.appendChild(div);
   });
 }
@@ -194,14 +196,28 @@ document.querySelectorAll(".btn-lg").forEach(btn => {
   });
 });
 
-/* ================= AUTH UI (ONLY SOURCE) ================= */
+/* ================= AUTH UI ================= */
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+}
+
+function logout() {
+  localStorage.removeItem("user");
+  updateAuthUI();
+  window.dispatchEvent(new Event("auth:update"));
+}
+
 function updateAuthUI() {
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const user = getUser();
 
   const loginBtn = $("loginBtn");
   const userBox = $("user");
 
-  if (!user) {
+  if (!user || !user.id) {
     if (loginBtn) loginBtn.style.display = "inline-flex";
     if (userBox) userBox.innerHTML = "";
     return;
@@ -211,26 +227,42 @@ function updateAuthUI() {
 
   if (userBox) {
     userBox.innerHTML = `
-      <div class="user-pill">
-        <img src="${user.avatar}" class="user-avatar">
-        <span class="user-name">${user.username}</span>
-        <button id="logoutBtn">Wyloguj</button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-trigger" id="userTrigger">
+          <img src="${user.avatar}" class="user-avatar" alt="${user.username}">
+        </div>
+
+        <div class="user-menu">
+          <button id="logoutBtn" class="logout-btn">Wyloguj</button>
+        </div>
       </div>
     `;
 
-    document.getElementById("logoutBtn")?.addEventListener("click", () => {
-      localStorage.removeItem("user");
-      updateAuthUI();
+    const dropdown = document.getElementById("userDropdown");
+    const trigger = document.getElementById("userTrigger");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    trigger?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle("active");
+    });
+
+    document.addEventListener("click", () => {
+      dropdown?.classList.remove("active");
+    });
+
+    logoutBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      logout();
     });
   }
 }
 
-/* INIT AUTH */
 updateAuthUI();
 
-/* SYNC */
 window.addEventListener("auth:update", updateAuthUI);
-window.addEventListener("storage", e => {
+
+window.addEventListener("storage", (e) => {
   if (e.key === "user") updateAuthUI();
 });
 
