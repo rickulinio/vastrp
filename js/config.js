@@ -1,7 +1,7 @@
 const CONFIG = {
     // ID graczy i przypisane im frakcje (role)
     admins: {
-        "123456789012345678": ["lspd", "ems"],
+        "618689685253914624": ["lspd", "ems"],
         "876543210987654321": ["crime"]
     },
     // Frakcje dostępne na serwerze
