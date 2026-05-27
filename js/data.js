@@ -15,12 +15,6 @@ const FACTIONS = [
         section: 'OOC',
         items: [
           {
-            id: 'adm1',
-            label: 'Nazwa + Discord ID',
-            type: 'input',
-            required: true
-          },
-          {
             id: 'adm2',
             label: 'Link do profilu steam',
             type: 'input',
@@ -30,7 +24,8 @@ const FACTIONS = [
             id: 'adm3',
             label: 'Wiek',
             type: 'input',
-            required: true
+            required: true,
+            maxLength: 2
           },
           {
             id: 'adm4',
@@ -88,16 +83,11 @@ const FACTIONS = [
         section: 'OOC',
         items: [
           {
-            id: '1',
-            label: 'Nazwa + Discord ID',
-            type: 'input',
-            required: true
-          },
-          {
             id: '2',
             label: 'Wiek',
             type: 'input',
-            required: true
+            required: true,
+            maxLength: 2
           },
           {
             id: '3',
@@ -196,16 +186,11 @@ const FACTIONS = [
       section: 'OOC',
       items: [
         {
-          id: '1756564307',
-          label: 'Discord ID:',
-          type: 'input',
-          required: true
-        },
-        {
           id: '20030300303',
           label: 'Wiek:',
           type: 'input',
-          required: true
+          required: true,
+          maxLength: 2
         },
         {
           id: '45464765',
@@ -287,12 +272,6 @@ const FACTIONS = [
         section: 'OOC',
         items: [
           {
-            id: '13',
-            label: 'Nick Discord lub/i ID:',
-            type: 'input',
-            required: true
-          },
-          {
             id: '14',
             label: 'Twoje Imię:',
             type: 'input',
@@ -302,7 +281,8 @@ const FACTIONS = [
             id: '15',
             label: 'Wiek (min. 14):',
             type: 'input',
-            required: true
+            required: true,
+            maxLength: 2
           },
           {
             id: '16',
@@ -400,16 +380,11 @@ const FACTIONS = [
         section: 'OOC',
         items: [
           {
-            id: '28',
-            label: 'Nick Discord lub/i ID:',
-            type: 'input',
-            required: true
-          },
-          {
             id: '29',
-            label: 'Ile masz lat :',
+            label: 'Wiek:',
             type: 'input',
-            required: true
+            required: true,
+            maxLength: 2
           },
           {
             id: '30',
@@ -478,12 +453,6 @@ const FACTIONS = [
         section: 'OOC',
         items: [
           {
-            id: '38',
-            label: 'Nick Discord lub/i ID:',
-            type: 'input',
-            required: true
-          },
-          {
             id: '39',
             label: 'Twoje Imię:',
             type: 'input',
@@ -491,9 +460,10 @@ const FACTIONS = [
           },
           {
             id: '40',
-            label: 'Wiek',
+            label: 'Wiek:',
             type: 'input',
-            required: true
+            required: true,
+            maxLength: 2
           },
           {
             id: '41',
