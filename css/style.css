@@ -80,9 +80,9 @@ body::after {
   transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
 }
 .nav.scrolled {
-  background: rgba(9,9,11,0.85);
+  background: rgba(9, 9, 11, 0);
   border-color: var(--border);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(6px);
 }
 .nav-logo {
   font-family: var(--font-display);
@@ -104,7 +104,7 @@ body::after {
   border-radius: 6px;
   transition: color 0.2s, background 0.2s;
 }
-.nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-links a:hover { color: var(--text); background: rgba(255, 255, 255, 0); }
 .nav-action {
   margin-left: 1rem;
   display: flex; gap: 0.5rem;
@@ -120,7 +120,7 @@ body::after {
   color: var(--muted);
   border: 1px solid var(--border);
 }
-.nav-btn-ghost:hover { color: var(--text); border-color: var(--border-h); background: rgba(255,255,255,0.04); }
+.nav-btn-ghost:hover { color: var(--text); border-color: var(--border-h); background: rgba(255, 255, 255, 0); }
 .nav-btn-fill {
   background: var(--accent);
   color: #fff;
@@ -165,46 +165,6 @@ body::after {
   }
 }
 
-/* GLOW ORBS */
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  /* Zmniejszamy blur, jeśli czarne obwódki nie znikają, 
-     lub używamy 'will-change' dla lepszego renderingu */
-  filter: blur(80px); 
-  opacity: 0.8; 
-  pointer-events: none;
-  animation: floatOrb 12s ease-in-out infinite;
-  /* Jeśli nadal będą "czarne", usuń poniższą linię, 
-     bo blend-mode potrafi przyciemniać krawędzie w specyficznych warunkach */
-  mix-blend-mode: screen; 
-}
-
-.orb-1 {
-  width: 500px;
-  height: 500px;
-  /* Zmieniamy 70% na 95% - gradient kończy się niemal na krawędzi diva */
-  background: radial-gradient(circle, #7700ff 0%, rgba(119, 0, 255, 0) 95%);
-  top: 5%;
-  left: 5%;
-}
-
-.orb-2 {
-  width: 450px;
-  height: 450px;
-  /* To samo tutaj - 95% daje bardzo miękkie zakończenie */
-  background: radial-gradient(circle, #4e46e5 0%, rgba(78, 70, 229, 0) 95%);
-  bottom: 5%;
-  right: 5%;
-  animation-delay: -3s;
-}
-
-@keyframes floatOrb {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, -50px) scale(1.1); }
-}
-
-
 /* PARTICLES */
 #particles {
   position: absolute;
@@ -219,19 +179,13 @@ body::after {
   position: absolute;
   width: 700px; height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(91,127,255,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(91, 127, 255, 0) 0%, transparent 70%);
   top: -150px; left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
 }
 .hero::after {
-  content: '';
-  position: absolute;
-  width: 400px; height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%);
-  bottom: 0; right: 10%;
-  pointer-events: none;
+  display: none !important;
 }
 
 .hero-inner { position: relative; z-index: 1; max-width: 780px; }
@@ -2429,4 +2383,84 @@ body {
 #player-count { 
   color: var(--primary-color); 
   text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.5);
+}
+
+
+/* ══════════════════════════════════════
+   MODERN LIFTING - ENHANCEMENTS
+══════════════════════════════════════ */
+
+/* 1. Glassmorphism 2.0 - bardziej "premium" */
+.cta-card, .rules-box, .player-item {
+    background: linear-gradient(135deg, rgba(24, 24, 31, 0.8), rgba(20, 20, 25, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+}
+
+/* 2. Interaktywne przyciski z "Glow" */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(45deg, var(--accent), #a855f7);
+    border: none;
+    color: white;
+}
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: 0.5s;
+}
+.btn-primary:hover::after { left: 100%; }
+
+/* 3. Poprawa czytelności długich tekstów */
+.rules-box p, .cta-desc {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+}
+
+/* 4. Subtelny "Focus" dla pól formularza */
+.fi, .fta {
+    background: rgba(0,0,0,0.3) !important;
+    border: 1px solid var(--border) !important;
+    transition: all 0.3s ease;
+}
+.fi:focus, .fta:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 4px rgba(134, 32, 214, 0.15) !important;
+}
+
+/* 5. Nagłówki z subtelnym gradientem */
+h2 span {
+    background: linear-gradient(to right, var(--accent), #e879f9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* Nowy kontener globalny */
+.global-bg {
+  position: fixed; /* Kluczowe: tło nie przewija się z treścią */
+  inset: 0;
+  z-index: -1; /* Zawsze pod spodem */
+  overflow: hidden;
+  background-color: #0b090b; /* Główny kolor tła strony */
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+}
+
+.orb {
+  position: absolute;
+}
+
+.hero, section {
+  background: transparent !important;
 }
